@@ -568,7 +568,9 @@
 
   <style>
     .strat-group { margin: 28px 0 8px; }
-    .strat-group-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #444; margin-bottom: 10px; }
+    .strat-group-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding: 6px 12px; border-radius: 4px; display: inline-block; }
+    .strat-group-label.internal { background: #0d1f2d; color: #4a9eca; border: 1px solid #1a3a52; }
+    .strat-group-label.external { background: #1a1a0d; color: #c8a840; border: 1px solid #3a3510; }
     details.strat-item { border-bottom: 1px solid #1e1e1e; }
     details.strat-item:first-of-type { border-top: 1px solid #1e1e1e; }
     details.strat-item summary { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; cursor: pointer; list-style: none; }
@@ -578,7 +580,9 @@
     .strat-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .strat-badge { font-size: 0.68rem; font-weight: 600; color: #555; }
     .strat-site { font-size: 0.68rem; font-weight: 500; background: #1a1a1a; border: 1px solid #333; border-radius: 3px; padding: 1px 6px; color: #888; }
-    .strat-sub-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #333; margin: 20px 0 8px; padding-left: 0; }
+    .strat-sub-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 22px 0 6px; padding: 3px 8px; border-radius: 3px; display: inline-block; }
+    .strat-group.internal .strat-sub-label { color: #3a7ca8; background: #091520; border: 1px solid #122233; }
+    .strat-group.external .strat-sub-label { color: #9a7c28; background: #131200; border: 1px solid #2a2800; }
     .strat-arrow { font-size: 0.7rem; color: #444; transition: transform 0.15s; }
     details[open] .strat-arrow { transform: rotate(90deg); }
     .strat-body { padding: 0 0 16px 0; color: #888; font-size: 0.86rem; line-height: 1.65; border-left: 2px solid #222; margin-left: 2px; padding-left: 14px; }
@@ -587,8 +591,8 @@
   </style>
 
   <!-- INTERNAL · TECHNICAL -->
-  <div class="strat-group">
-    <div class="strat-group-label">Internal · Technical</div>
+  <div class="strat-group internal">
+    <div class="strat-group-label internal">Internal · Technical</div>
 
     <details class="strat-item">
       <summary><span class="strat-title">Fix Help Centre JavaScript rendering</span><span class="strat-meta"><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
@@ -612,8 +616,8 @@
   </div>
 
   <!-- INTERNAL · NON-TECHNICAL -->
-  <div class="strat-group">
-    <div class="strat-group-label">Internal · Non-Technical</div>
+  <div class="strat-group internal">
+    <div class="strat-group-label internal">Internal · Non-Technical</div>
 
     <details class="strat-item">
       <summary><span class="strat-title">Respond to all 1 and 2-star Trustpilot reviews</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
@@ -642,8 +646,8 @@
   </div>
 
   <!-- EXTERNAL -->
-  <div class="strat-group">
-    <div class="strat-group-label">External</div>
+  <div class="strat-group external">
+    <div class="strat-group-label external">External</div>
 
     <!-- Trustpilot -->
     <div class="strat-sub-label">Trustpilot</div>
