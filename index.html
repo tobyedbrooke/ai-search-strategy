@@ -189,6 +189,43 @@
   <p class="section-sub">Three layers: the mechanism, the sources, and what matters within each</p>
 
 
+  <style>
+    /* Level 2 expandable sources */
+    details.src-item { border-bottom: 1px solid #1a1a1a; }
+    details.src-item:first-of-type { border-top: 1px solid #1a1a1a; }
+    details.src-item summary { display: flex; align-items: center; gap: 12px; padding: 12px 0; cursor: pointer; list-style: none; }
+    details.src-item summary::-webkit-details-marker { display: none; }
+    details.src-item summary:hover .src-title { color: #fff; }
+    .src-num { font-size: 0.72rem; font-weight: 700; color: #444; width: 16px; flex-shrink: 0; }
+    .src-title { font-size: 0.92rem; font-weight: 500; color: #c8c8c8; flex: 1; }
+    .src-title span { color: #555; font-weight: 400; font-size: 0.82rem; }
+    .src-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .src-arrow { font-size: 0.65rem; color: #444; transition: transform 0.15s; }
+    details[open] .src-arrow { transform: rotate(90deg); }
+    .src-body { padding: 4px 0 14px 28px; font-size: 0.85rem; color: #777; line-height: 1.6; }
+    .src-body p { margin-bottom: 6px; }
+    .src-body .src-examples { font-size: 0.78rem; color: #444; margin-top: 6px; }
+    /* Level 3 signal details */
+    details.sig-item { border-bottom: 1px solid #1a1a1a; }
+    details.sig-item:first-of-type { border-top: 1px solid #1a1a1a; margin-top: 8px; }
+    details.sig-item summary { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; cursor: pointer; list-style: none; font-size: 0.9rem; font-weight: 500; color: #c8c8c8; }
+    details.sig-item summary::-webkit-details-marker { display: none; }
+    details.sig-item summary:hover { color: #fff; }
+    .sig-body { padding: 4px 0 12px 0; }
+    .sig-body ul { padding-left: 16px; margin: 0; }
+    .sig-body li { font-size: 0.83rem; color: #777; margin-bottom: 5px; }
+    .sig-body li strong { color: #aaa; }
+    /* Insight details */
+    details.ins-item { border-bottom: 1px solid #1a1a1a; }
+    details.ins-item:first-of-type { border-top: 1px solid #1a1a1a; }
+    details.ins-item summary { display: flex; align-items: center; gap: 14px; padding: 13px 0; cursor: pointer; list-style: none; }
+    details.ins-item summary::-webkit-details-marker { display: none; }
+    details.ins-item summary:hover .ins-title { color: #fff; }
+    .ins-num { font-size: 0.7rem; font-weight: 700; color: #444; width: 20px; flex-shrink: 0; }
+    .ins-title { font-size: 0.9rem; font-weight: 500; color: #c8c8c8; flex: 1; }
+    .ins-body { padding: 2px 0 14px 34px; font-size: 0.83rem; color: #777; line-height: 1.6; }
+  </style>
+
   <!-- ── LEVEL 1 ── -->
   <div style="margin-top: 28px;">
     <div class="level-label">Level 1 — The mechanism</div>
@@ -197,7 +234,7 @@
     <div class="mechanic-card">
       <div class="mechanic-icon">🔍</div>
       <div>
-        <div class="mechanic-title">It scans thousands of sources and looks for patterns</div>
+        <div class="mechanic-title">Pattern Recognition</div>
         <div class="mechanic-desc">AI models don't search like Google — they read and synthesise. They scan editorial sites, review platforms, forums, and product pages looking for what words consistently appear next to "Trade Republic."</div>
       </div>
     </div>
@@ -205,15 +242,15 @@
     <div class="mechanic-card">
       <div class="mechanic-icon">📌</div>
       <div>
-        <div class="mechanic-title">It extracts facts — not opinions</div>
-        <div class="mechanic-desc">Vague claims ("great app", "we believe investing should be for everyone") are ignored. Specific, extractable facts are indexed: <strong>€1 per trade · 4% interest · ideal for beginners · poor customer service</strong>. Numbers, feature names, and use cases are what get stored.</div>
+        <div class="mechanic-title">Extractable Facts</div>
+        <div class="mechanic-desc">Vague claims ("great app", "we believe investing should be for everyone") are ignored. Specific, extractable facts are indexed: <strong>€1 per trade · 2% interest · ideal for beginners · poor customer service</strong>. Numbers, feature names, and use cases are what get stored.</div>
       </div>
     </div>
 
     <div class="mechanic-card">
       <div class="mechanic-icon">🔄</div>
       <div>
-        <div class="mechanic-title">It builds a profile through consistency</div>
+        <div class="mechanic-title">Consistency</div>
         <div class="mechanic-desc">One source saying "TR is beginner-friendly" = a weak signal. Finanztip <em>and</em> 20 Trustpilot reviews <em>and</em> a Reddit thread all independently saying it = a verified fact. The model states it confidently. The same applies negatively — 200 unanswered reviews mentioning "customer service" becomes a verified attribute too.</div>
       </div>
     </div>
@@ -221,7 +258,7 @@
     <div class="mechanic-card">
       <div class="mechanic-icon">🎯</div>
       <div>
-        <div class="mechanic-title">Use cases determine which queries TR appears in</div>
+        <div class="mechanic-title">Use Cases Drive Discovery</div>
         <div class="mechanic-desc">Every mention of a specific use case ("first investment", "savings plan", "interest on cash") maps TR to a query type. A Trustpilot review saying "I'm a beginner and found TR easy" means TR gets cited in "best broker for beginners" responses. Reviews are not just a trust signal — they are a discovery mechanism.</div>
       </div>
     </div>
@@ -231,69 +268,44 @@
   <!-- ── LEVEL 2 ── -->
   <div style="margin-top: 40px;">
     <div class="level-label">Level 2 — What AI values</div>
-    <p style="color:#666; font-size:0.85rem; margin-bottom:16px;">Sources ranked by weight — highest first</p>
+    <p style="color:#666; font-size:0.85rem; margin-bottom:4px;">Sources ranked by weight — click to expand</p>
 
-    <div style="background:#111; border:1px solid #1e1e1e; border-radius:10px; padding:8px 20px;">
+    <div style="margin-top: 12px;">
 
-      <div class="source-row">
-        <div class="source-rank">1</div>
-        <div>
-          <div class="source-name">Independent editorial <span style="color:#555; font-weight:400; font-size:0.8rem;">— Finanztip, Stiftung Warentest, Handelsblatt</span></div>
-          <div class="source-why">Models are trained to weight independent sources far above brand content. One Finanztip article recommending TR carries more influence than TR's entire website.</div>
-          <div class="source-examples">Finanztip · Stiftung Warentest · Finanzfluss · financial press</div>
-        </div>
-        <div><span class="weight-pill weight-critical">Critical</span></div>
-      </div>
+      <details class="src-item">
+        <summary><span class="src-num">1</span><span class="src-title">Independent Editorial <span>— Finanztip, Stiftung Warentest, Handelsblatt</span></span><span class="src-right"><span class="weight-pill weight-critical">Critical</span><span class="src-arrow">▶</span></span></summary>
+        <div class="src-body"><p>Models are trained to weight independent sources far above brand content. One Finanztip article recommending TR carries more influence than TR's entire website. AI cannot distinguish paid placement from editorial — it treats all content on these sites as independent opinion.</p><div class="src-examples">Finanztip · Stiftung Warentest · Finanzfluss · Handelsblatt · financial press</div></div>
+      </details>
 
-      <div class="source-row">
-        <div class="source-rank">2</div>
-        <div>
-          <div class="source-name">Review platforms <span style="color:#555; font-weight:400; font-size:0.8rem;">— Trustpilot</span></div>
-          <div class="source-why">All three AI models index Trustpilot directly. It's typically the first page they retrieve for any trust query about TR. The score, response rate, and review text are all read and used.</div>
-          <div class="source-examples">Score · star distribution · response rate % · review language</div>
-        </div>
-        <div><span class="weight-pill weight-critical">Critical</span></div>
-      </div>
+      <details class="src-item">
+        <summary><span class="src-num">2</span><span class="src-title">Review Sites <span>— Trustpilot</span></span><span class="src-right"><span class="weight-pill weight-critical">Critical</span><span class="src-arrow">▶</span></span></summary>
+        <div class="src-body"><p>All three AI models index Trustpilot directly. It is typically the first page retrieved for any trust query about TR. The aggregate score, response rate %, star distribution and review text are all read and used verbatim. A 3.3 score means AI frames TR cautiously on every safety and trust query.</p><div class="src-examples">Score · star distribution · response rate % · review language · recency</div></div>
+      </details>
 
-      <div class="source-row">
-        <div class="source-rank">3</div>
-        <div>
-          <div class="source-name">Comparison sites <span style="color:#555; font-weight:400; font-size:0.8rem;">— Brokervergleich, Finanzfluss, Vergleich.de</span></div>
-          <div class="source-why">These rank #1–3 in Google for "best broker" queries. AI models retrieve them first for recommendation requests. If TR's data is wrong or missing here, models quote it wrong.</div>
-          <div class="source-examples">Fee tables · feature comparisons · ranking position · affiliate relationships</div>
-        </div>
-        <div><span class="weight-pill weight-critical">Critical</span></div>
-      </div>
+      <details class="src-item">
+        <summary><span class="src-num">3</span><span class="src-title">Comparison Sites <span>— Brokervergleich.de, Finanzfluss, Vergleich.de</span></span><span class="src-right"><span class="weight-pill weight-critical">Critical</span><span class="src-arrow">▶</span></span></summary>
+        <div class="src-body"><p>These rank #1–3 in Google for "best broker" queries. AI models retrieve them first for recommendation requests. If TR's data is wrong or missing here, AI quotes it wrong at scale. Affiliate commission rates directly affect how prominently TR appears — AI does not distinguish commercial from editorial.</p><div class="src-examples">Fee tables · feature comparisons · ranking position · affiliate relationships</div></div>
+      </details>
 
-      <div class="source-row">
-        <div class="source-rank">4</div>
-        <div>
-          <div class="source-name">Community forums <span style="color:#555; font-weight:400; font-size:0.8rem;">— Reddit r/Finanzen, r/Finanztip</span></div>
-          <div class="source-why">Used specifically for "real user experience" queries. Old negative threads with high upvotes still influence AI responses today. Cannot be removed — only diluted by newer positive content.</div>
-          <div class="source-examples">Thread recency · upvote count · feature language · official responses</div>
-        </div>
-        <div><span class="weight-pill weight-high">High</span></div>
-      </div>
+      <details class="src-item">
+        <summary><span class="src-num">4</span><span class="src-title">Community Forums <span>— Reddit r/Finanzen, r/Finanztip</span></span><span class="src-right"><span class="weight-pill weight-high">High</span><span class="src-arrow">▶</span></span></summary>
+        <div class="src-body"><p>Used specifically for "real user experience" queries. Old negative threads with high upvotes still influence AI responses today. Cannot be deleted — only diluted by newer positive content. AI reads the full thread including replies; unanswered complaints carry more weight than acknowledged ones.</p><div class="src-examples">Thread recency · upvote count · feature language · official responses</div></div>
+      </details>
 
-      <div class="source-row">
-        <div class="source-rank">5</div>
-        <div>
-          <div class="source-name">Owned content <span style="color:#555; font-weight:400; font-size:0.8rem;">— Help centre, product pages</span></div>
-          <div class="source-why">Only relevant for specific product queries. Models extract the first sentence of a page as the answer — marketing prose returns nothing. Schema markup bypasses this limitation entirely.</div>
-          <div class="source-examples">FAQ page structure · FAQPage schema · product spec pages · first-sentence answers</div>
-        </div>
-        <div><span class="weight-pill weight-medium">Medium</span></div>
-      </div>
+      <details class="src-item">
+        <summary><span class="src-num">5</span><span class="src-title">Trusted Reference Sources <span>— Wikipedia, .gov, .org consumer sites</span></span><span class="src-right"><span class="weight-pill weight-high">High</span><span class="src-arrow">▶</span></span></summary>
+        <div class="src-body"><p>AI models treat Wikipedia and authoritative non-commercial sources (.gov financial regulators, .org consumer bodies like vzbv) as ground truth for factual company data. Customer count, founding date, regulatory status, markets operated in — all sourced from here first. Inaccuracies on Wikipedia propagate to every AI response that mentions TR.</p><div class="src-examples">Wikipedia · BaFin.de · vzbv.de · ECB · national consumer protection bodies</div></div>
+      </details>
 
-      <div class="source-row">
-        <div class="source-rank">6</div>
-        <div>
-          <div class="source-name">Structured data &amp; technical signals <span style="color:#555; font-weight:400; font-size:0.8rem;">— Schema, Wikipedia, robots.txt</span></div>
-          <div class="source-why">Schema markup tells models exactly what a page contains without parsing prose. FAQPage schema feeds directly into Google AI Overviews above organic results. Crawl permissions are a prerequisite — if blocked, nothing else matters.</div>
-          <div class="source-examples">FAQPage schema · Organization schema · Wikipedia accuracy · GPTBot / PerplexityBot permissions</div>
-        </div>
-        <div><span class="weight-pill weight-medium">Medium</span></div>
-      </div>
+      <details class="src-item">
+        <summary><span class="src-num">6</span><span class="src-title">Owned Content <span>— Help Centre, product pages</span></span><span class="src-right"><span class="weight-pill weight-medium">Medium</span><span class="src-arrow">▶</span></span></summary>
+        <div class="src-body"><p>Only relevant for specific product queries. Models extract the first sentence of a page as the answer — marketing prose returns nothing useful. Schema markup bypasses this limitation entirely by labelling content directly. Currently: TR's Help Centre is JavaScript-rendered, meaning AI crawlers cannot read it at all.</p><div class="src-examples">FAQ page structure · FAQPage schema · product spec pages · first-sentence answers · German-language content</div></div>
+      </details>
+
+      <details class="src-item">
+        <summary><span class="src-num">7</span><span class="src-title">Technical Signals <span>— Schema markup, robots.txt</span></span><span class="src-right"><span class="weight-pill weight-medium">Medium</span><span class="src-arrow">▶</span></span></summary>
+        <div class="src-body"><p>Schema markup tells models exactly what a page contains without parsing prose. FAQPage schema feeds directly into Google AI Overviews above organic results. Crawl permissions are a prerequisite — if AI bots are blocked, nothing else matters. Confirmed: TR currently has zero schema markup anywhere on the site.</p><div class="src-examples">FAQPage schema · Organization schema · Product schema · GPTBot / PerplexityBot / ClaudeBot permissions</div></div>
+      </details>
 
     </div>
   </div>
@@ -302,70 +314,80 @@
   <!-- ── LEVEL 3 ── -->
   <div style="margin-top: 40px;">
     <div class="level-label">Level 3 — What matters within each source</div>
-    <p style="color:#666; font-size:0.85rem; margin-bottom:16px;">The specific signals AI models read and act on</p>
+    <p style="color:#666; font-size:0.85rem; margin-bottom:4px;">The specific signals AI models read — click to expand</p>
 
-    <div class="signal-grid">
+    <div style="margin-top: 12px;">
 
-      <div class="signal-card">
-        <div class="signal-source-label">Editorial</div>
-        <ul>
-          <li><strong>Named product attributes</strong> — "best for beginners", "cheapest fees"</li>
-          <li><strong>Recency</strong> — 2025 article beats 2022 on the same topic</li>
-          <li><strong>Specific numbers</strong> — €1/trade, 4,000+ ETFs</li>
-          <li><strong>Cross-citation</strong> — editorial sources citing each other reinforce authority</li>
-        </ul>
-      </div>
+      <details class="sig-item">
+        <summary>Independent Editorial<span class="src-arrow" style="margin-left:auto;">▶</span></summary>
+        <div class="sig-body"><ul>
+          <li><strong>Named product attributes</strong> — "best for beginners", "cheapest fees" — AI quotes these phrases directly</li>
+          <li><strong>Recency</strong> — a 2025 article beats a 2022 article on the same topic</li>
+          <li><strong>Specific numbers</strong> — €1/trade, 2,600+ ETFs — these are indexed as facts</li>
+          <li><strong>Cross-citation</strong> — editorial sources citing each other reinforce authority weight</li>
+        </ul></div>
+      </details>
 
-      <div class="signal-card">
-        <div class="signal-source-label">Trustpilot</div>
-        <ul>
-          <li><strong>Aggregate score</strong> — quoted verbatim</li>
-          <li><strong>Response rate %</strong> — public metric, read directly by models</li>
-          <li><strong>Review language</strong> — feature/use case mentions map TR to query types</li>
-          <li><strong>Response text</strong> — moderates each review's negative signal</li>
-          <li><strong>Star distribution</strong> — % of 1-star signals systemic failure</li>
-        </ul>
-      </div>
+      <details class="sig-item">
+        <summary>Review Sites — Trustpilot<span class="src-arrow" style="margin-left:auto;">▶</span></summary>
+        <div class="sig-body"><ul>
+          <li><strong>Aggregate score</strong> — quoted verbatim by AI on every trust query</li>
+          <li><strong>Response rate %</strong> — public metric read directly by models; signals whether TR cares about customers</li>
+          <li><strong>Review language</strong> — feature and use case mentions map TR to query types</li>
+          <li><strong>Response text</strong> — each response moderates that review's negative signal</li>
+          <li><strong>Star distribution</strong> — 20% of reviews being 1-star signals systemic failure to AI</li>
+        </ul></div>
+      </details>
 
-      <div class="signal-card">
-        <div class="signal-source-label">Comparison Sites</div>
-        <ul>
-          <li><strong>Data accuracy</strong> — wrong fee = quoted wrong by AI</li>
-          <li><strong>Ranking position</strong> — #1 on a comparison table = cited first</li>
-          <li><strong>Feature completeness</strong> — missing features = model says TR doesn't have them</li>
-          <li><strong>Affiliate relationship</strong> — drives content volume and prominence</li>
-        </ul>
-      </div>
+      <details class="sig-item">
+        <summary>Comparison Sites<span class="src-arrow" style="margin-left:auto;">▶</span></summary>
+        <div class="sig-body"><ul>
+          <li><strong>Data accuracy</strong> — wrong fee quoted on a comparison site = AI quotes it wrong everywhere</li>
+          <li><strong>Ranking position</strong> — #1 on a comparison table = AI cites TR first for that query type</li>
+          <li><strong>Feature completeness</strong> — if a feature isn't listed, AI says TR doesn't have it</li>
+          <li><strong>Affiliate relationship</strong> — commission rate drives content volume and prominence</li>
+        </ul></div>
+      </details>
 
-      <div class="signal-card">
-        <div class="signal-source-label">Reddit</div>
-        <ul>
-          <li><strong>Upvote count</strong> — proxy for community endorsement</li>
-          <li><strong>Recency</strong> — newer threads dilute older negatives</li>
-          <li><strong>Use case language</strong> — seeds attribute associations</li>
-          <li><strong>Official presence</strong> — TR responding = acknowledged accountability</li>
-        </ul>
-      </div>
+      <details class="sig-item">
+        <summary>Community Forums — Reddit<span class="src-arrow" style="margin-left:auto;">▶</span></summary>
+        <div class="sig-body"><ul>
+          <li><strong>Upvote count</strong> — proxy for community consensus; high-upvote threads carry most weight</li>
+          <li><strong>Recency</strong> — newer threads dilute older negatives but cannot remove them</li>
+          <li><strong>Use case language</strong> — organic feature mentions seed attribute associations</li>
+          <li><strong>Official presence</strong> — TR responding signals accountability; no response signals avoidance</li>
+        </ul></div>
+      </details>
 
-      <div class="signal-card">
-        <div class="signal-source-label">Help Centre</div>
-        <ul>
-          <li><strong>First sentence</strong> — must be a direct answer, not marketing copy</li>
-          <li><strong>Specific facts</strong> — numbers and features only; vague claims ignored</li>
+      <details class="sig-item">
+        <summary>Trusted Reference Sources — Wikipedia<span class="src-arrow" style="margin-left:auto;">▶</span></summary>
+        <div class="sig-body"><ul>
+          <li><strong>Customer count</strong> — AI states this as fact; currently conflicted between 8M and 10M on TR's Wikipedia page</li>
+          <li><strong>Regulatory status</strong> — BaFin-licensed bank; must be accurate or AI misstates TR's legal standing</li>
+          <li><strong>Market list</strong> — determines which country queries TR appears in</li>
+          <li><strong>Consumer body citations</strong> — vzbv and BaFin complaint data is indexed by AI as independent validation of service quality</li>
+        </ul></div>
+      </details>
+
+      <details class="sig-item">
+        <summary>Owned Content — Help Centre<span class="src-arrow" style="margin-left:auto;">▶</span></summary>
+        <div class="sig-body"><ul>
+          <li><strong>First sentence</strong> — must be a direct answer; AI reads it and stops</li>
+          <li><strong>Specific facts</strong> — numbers and features only; vague claims are ignored</li>
           <li><strong>German-language</strong> — DE queries surface German content preferentially</li>
-          <li><strong>Page freshness</strong> — outdated product info gets quoted as current</li>
-        </ul>
-      </div>
+          <li><strong>Page freshness</strong> — outdated product info gets quoted as current fact</li>
+        </ul></div>
+      </details>
 
-      <div class="signal-card">
-        <div class="signal-source-label">Structured Data</div>
-        <ul>
-          <li><strong>FAQPage schema</strong> — extracted into Google AI Overviews directly</li>
-          <li><strong>Organization schema</strong> — feeds knowledge panels and rating display</li>
-          <li><strong>Crawl permissions</strong> — GPTBot/PerplexityBot must be allowed or content is invisible</li>
-          <li><strong>llms.txt</strong> — plain-text AI summary file, early-adopter advantage</li>
-        </ul>
-      </div>
+      <details class="sig-item">
+        <summary>Technical Signals — Schema &amp; robots.txt<span class="src-arrow" style="margin-left:auto;">▶</span></summary>
+        <div class="sig-body"><ul>
+          <li><strong>FAQPage schema</strong> — extracted directly into Google AI Overviews above organic results</li>
+          <li><strong>Organization schema</strong> — establishes TR's identity, products and markets as labelled facts</li>
+          <li><strong>Crawl permissions</strong> — GPTBot/PerplexityBot/ClaudeBot must be allowed or all content is invisible to that model</li>
+          <li><strong>JS rendering</strong> — if pages are JavaScript-only, AI bots read empty HTML regardless of permissions</li>
+        </ul></div>
+      </details>
 
     </div>
   </div>
@@ -374,73 +396,49 @@
   <!-- ── ACTIONABLE INSIGHTS ── -->
   <div style="margin-top: 40px;">
     <div class="level-label">From this — actionable insights</div>
-    <p style="color:#666; font-size:0.85rem; margin-bottom:16px;">What TR should do, derived directly from how the algorithm works</p>
+    <p style="color:#666; font-size:0.85rem; margin-bottom:4px;">What TR should do, derived directly from how the algorithm works — click to expand</p>
 
-    <div class="insight-list">
+    <div style="margin-top: 12px;">
 
-      <div class="insight-item">
-        <div class="insight-num">01</div>
-        <div class="insight-body">
-          <div class="insight-action">Respond to every existing 1 and 2-star Trustpilot review <span class="insight-effort effort-low">Low effort</span></div>
-          <div class="insight-why">Each response adds indexed text that moderates the review's negative signal. Response rate % is a first-class metric that AI models read directly. Perplexity reflects changes within 72 hours. Zero cost.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">01</span><span class="ins-title">Respond to every 1 and 2-star Trustpilot review</span><span class="insight-effort effort-low" style="flex-shrink:0;">Low effort</span></summary>
+        <div class="ins-body">Each response adds indexed text that moderates the review's negative signal. Response rate % is a first-class metric that AI models read directly. Perplexity reflects changes within 72 hours. Zero cost — start today.</div>
+      </details>
 
-      <div class="insight-item">
-        <div class="insight-num">02</div>
-        <div class="insight-body">
-          <div class="insight-action">Launch targeted Trustpilot invite campaign to move score from 3.3 → 3.8 before May 12 <span class="insight-effort effort-high">Urgent</span></div>
-          <div class="insight-why">18,000–20,000 new reviews needed at 4.8★ avg. Use 7 high-sentiment segments. Requires paid AFS subscription — without it, reviews get silently filtered. Score movement directly changes AI trust query framing.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">02</span><span class="ins-title">Launch a Trustpilot invite campaign to move the score from 3.3 → 4.0</span><span class="insight-effort effort-high" style="flex-shrink:0;">Urgent</span></summary>
+        <div class="ins-body">18,000–20,000 new reviews needed at 4.8★ avg to reach 3.8. Target happy moments: RAF reward, 10th trade, resolved support. Requires paid AFS subscription — without it, reviews get silently removed. Score movement directly changes AI framing on every trust query.</div>
+      </details>
 
-      <div class="insight-item">
-        <div class="insight-num">03</div>
-        <div class="insight-body">
-          <div class="insight-action">Trigger review invites by use case to seed feature attributes <span class="insight-effort effort-low">Low effort</span></div>
-          <div class="insight-why">Ask after interest activation → reviews mention interest rate. Ask after 10th trade → reviews mention trading. Each maps TR to a different query type in AI models. Reviews are a discovery mechanism, not just a trust signal.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">03</span><span class="ins-title">Trigger review invites by use case to seed feature attributes</span><span class="insight-effort effort-low" style="flex-shrink:0;">Low effort</span></summary>
+        <div class="ins-body">Invite after interest activation → reviews mention interest rate. Invite after 10th trade → reviews mention trading. Each maps TR to a different query type in AI models. Reviews are a discovery mechanism, not just a trust signal.</div>
+      </details>
 
-      <div class="insight-item">
-        <div class="insight-num">04</div>
-        <div class="insight-body">
-          <div class="insight-action">Rewrite the first sentence of every key help centre page to be a direct answer <span class="insight-effort effort-low">Low effort</span></div>
-          <div class="insight-why">Models extract the opening line as the answer to that page's question. "At Trade Republic we believe..." returns nothing. "Trade Republic ETF savings plans start from €1/month with no execution fee" is immediately indexable.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">04</span><span class="ins-title">Rewrite the first sentence of every Help Centre page to be a direct answer</span><span class="insight-effort effort-low" style="flex-shrink:0;">Low effort</span></summary>
+        <div class="ins-body">AI reads the opening line and stops. "At Trade Republic we believe..." returns nothing. "Trade Republic ETF savings plans start from €1/month with no execution fee" is immediately indexable. Half a day of content work with meaningful AI impact.</div>
+      </details>
 
-      <div class="insight-item">
-        <div class="insight-num">05</div>
-        <div class="insight-body">
-          <div class="insight-action">Implement FAQPage schema on all key product and help pages <span class="insight-effort effort-low">Low effort</span></div>
-          <div class="insight-why">Feeds TR answers directly into Google AI Overviews above every organic result. One engineer, a few days. Immediately affects Gemini responses for every product query TR's pages cover.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">05</span><span class="ins-title">Fix Help Centre JavaScript rendering and add FAQPage schema</span><span class="insight-effort effort-high" style="flex-shrink:0;">Urgent</span></summary>
+        <div class="ins-body">AI bots cannot execute JavaScript. They are currently reading empty HTML on every Help Centre page. Enable SSR or static pre-render on Nuxt, then add FAQPage JSON-LD schema. This feeds TR answers directly into Google AI Overviews above every organic result.</div>
+      </details>
 
-      <div class="insight-item">
-        <div class="insight-num">06</div>
-        <div class="insight-body">
-          <div class="insight-action">Audit and update TR's data on all major comparison sites <span class="insight-effort effort-med">Medium effort</span></div>
-          <div class="insight-why">These are the first pages AI models retrieve for "best broker" queries. Wrong or missing data gets quoted. Every major comparison site needs to accurately reflect TR's current fees, features, and products.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">06</span><span class="ins-title">Audit and correct TR's data on all major comparison sites</span><span class="insight-effort effort-med" style="flex-shrink:0;">Medium effort</span></summary>
+        <div class="ins-body">These are the first pages AI retrieves for "best broker" queries. Wrong or stale data — an old interest rate, a missing feature — gets quoted at scale. Every major comparison site needs current fees, features and product data. Build a standing process triggered by every product change.</div>
+      </details>
 
-      <div class="insight-item">
-        <div class="insight-num">07</div>
-        <div class="insight-body">
-          <div class="insight-action">Proactive outreach to Finanztip and Stiftung Warentest <span class="insight-effort effort-med">Medium effort</span></div>
-          <div class="insight-why">One article on either site outweighs anything TR publishes itself. Independent editorial corroborating TR's product attributes is the fastest way to lock in positive AI framing across all three models.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">07</span><span class="ins-title">Brief Finanztip on TR's customer service improvements</span><span class="insight-effort effort-med" style="flex-shrink:0;">Medium effort</span></summary>
+        <div class="ins-body">Finanztip currently rates TR customer service 1/7 — the worst of all ten brokers they recommend. AI cites this directly. TR has invested double-digit millions in 24/7 human support. One briefing document to Finanztip's editor can change a score that is actively dragging AI recommendations.</div>
+      </details>
 
-      <div class="insight-item">
-        <div class="insight-num">08</div>
-        <div class="insight-body">
-          <div class="insight-action">Check robots.txt permits GPTBot, PerplexityBot, Google-Extended <span class="insight-effort effort-low">Low effort</span></div>
-          <div class="insight-why">If any of these crawlers are blocked, all other optimisations are invisible to that model. 5-minute engineering check. Non-negotiable prerequisite.</div>
-        </div>
-      </div>
+      <details class="ins-item">
+        <summary><span class="ins-num">08</span><span class="ins-title">Update Wikipedia and establish an official Reddit presence</span><span class="insight-effort effort-low" style="flex-shrink:0;">Low effort</span></summary>
+        <div class="ins-body">Wikipedia customer count is conflicted (8M vs 10M). All three AI platforms use it as factual ground truth — fix it once and it propagates everywhere. On Reddit, 45% of TR discussions are negative with no official TR response. A verified account responding factually changes what AI reads in every thread.</div>
+      </details>
 
     </div>
   </div>
@@ -579,6 +577,8 @@
     .strat-title { font-size: 0.92rem; font-weight: 500; color: #c8c8c8; }
     .strat-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .strat-badge { font-size: 0.68rem; font-weight: 600; color: #555; }
+    .strat-site { font-size: 0.68rem; font-weight: 500; background: #1a1a1a; border: 1px solid #333; border-radius: 3px; padding: 1px 6px; color: #888; }
+    .strat-sub-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #333; margin: 20px 0 8px; padding-left: 0; }
     .strat-arrow { font-size: 0.7rem; color: #444; transition: transform 0.15s; }
     details[open] .strat-arrow { transform: rotate(90deg); }
     .strat-body { padding: 0 0 16px 0; color: #888; font-size: 0.86rem; line-height: 1.65; border-left: 2px solid #222; margin-left: 2px; padding-left: 14px; }
@@ -616,17 +616,17 @@
     <div class="strat-group-label">Internal · Non-Technical</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Respond to all 1 and 2-star Trustpilot reviews</span><span class="strat-meta"><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Respond to all 1 and 2-star Trustpilot reviews</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>22% of TR's 32,953 Trustpilot reviews are 1 or 2-star. The response rate % is publicly visible and indexed by AI models. Perplexity reflects response rate changes within 72 hours. This is the highest-ROI action available: zero cost, immediate AI signal improvement.</p><p><strong>Action:</strong> CX team works through all unanswered 1 and 2-star reviews. Set a target to clear the backlog within two weeks.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Launch Trustpilot review invite campaign</span><span class="strat-meta"><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Launch Trustpilot review invite campaign</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Current score is 3.3. Finanztip rates TR customer service 1 out of 7 — the worst of all ten recommended brokers. This is the primary reason TR ranks 5th on every customer service and trust query across all three AI platforms.</p><p><strong>Action:</strong> Target happy moments — RAF reward received, 10th trade milestone, resolved support chat. Aim for 4.0. Monitor incoming star average daily; if it drops below 4.8 adjust segment targeting immediately.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Build always-on review invite infrastructure</span><span class="strat-meta"><span class="strat-badge">High</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Build always-on review invite infrastructure</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge">High</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>A one-off campaign will cause the score to decay again within months. Permanent automated triggers at key satisfaction moments maintain the score without ongoing effort.</p><p><strong>Action:</strong> CRM automation — post-RAF, post-trade milestone, post-resolved support ticket. Target 500–1,000 invites per day at steady state.</p></div>
     </details>
 
@@ -645,10 +645,16 @@
   <div class="strat-group">
     <div class="strat-group-label">External</div>
 
+    <!-- Trustpilot -->
+    <div class="strat-sub-label">Trustpilot</div>
+
     <details class="strat-item">
       <summary><span class="strat-title">Subscribe to Trustpilot AFS (paid plan)</span><span class="strat-meta"><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Without the paid AFS plan, a 50–150× spike above TR's normal review baseline triggers silent automatic review removal. Reviews stop counting and Trustpilot does not notify you. A campaign without AFS risks doing the work and getting nothing.</p><p><strong>Action:</strong> Procure AFS before the campaign goes live.</p></div>
     </details>
+
+    <!-- Finanztip / Stiftung Warentest -->
+    <div class="strat-sub-label">Finanztip / Stiftung Warentest</div>
 
     <details class="strat-item">
       <summary><span class="strat-title">Brief Finanztip on customer service improvements</span><span class="strat-meta"><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
@@ -656,9 +662,20 @@
     </details>
 
     <details class="strat-item">
+      <summary><span class="strat-title">Submit data to Stiftung Warentest for next broker test</span><span class="strat-meta"><span class="strat-badge">Medium</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>TR is currently noted in Stiftung Warentest coverage as leading in consumer complaints to the vzbv. Their broker tests are used directly as source material by AI models. Proactively supplying improvement evidence ahead of their next test influences the outcome.</p><p><strong>Action:</strong> Contact Stiftung Warentest ahead of their next scheduled broker test. Provide service improvement data and request the complaint narrative be updated.</p></div>
+    </details>
+
+    <!-- Wikipedia -->
+    <div class="strat-sub-label">Wikipedia</div>
+
+    <details class="strat-item">
       <summary><span class="strat-title">Update Wikipedia</span><span class="strat-meta"><span class="strat-badge">High</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>All three AI platforms use Wikipedia as a primary factual reference for company data. The current entry has conflicting customer count figures and may not reflect the December 2025 valuation.</p><p><strong>Action:</strong> Update customer count to 10M+ (September 2025), valuation to €12.5B (December 2025), confirm market list and product range. Set up a Wikipedia watchlist to catch future inaccurate edits.</p></div>
     </details>
+
+    <!-- Comparison Sites -->
+    <div class="strat-sub-label">Comparison Sites</div>
 
     <details class="strat-item">
       <summary><span class="strat-title">Audit data accuracy on comparison sites</span><span class="strat-meta"><span class="strat-badge">High</span><span class="strat-arrow">▶</span></span></summary>
@@ -666,18 +683,16 @@
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Establish an official TR presence on Reddit r/Finanzen</span><span class="strat-meta"><span class="strat-badge">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Reddit r/Finanzen sentiment on TR is 45% negative. There is no official TR presence, so complaints go unanswered and dominate threads. AI reads the full thread including replies — unanswered complaints carry more weight than answered ones.</p><p><strong>Action:</strong> Register a verified TR account. Respond factually (not promotionally) to active TR threads. Do not attempt to remove negative posts — dilute with accurate, helpful responses.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Submit data to Stiftung Warentest for next broker test</span><span class="strat-meta"><span class="strat-badge">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>TR is currently noted in Stiftung Warentest coverage as leading in consumer complaints to the vzbv. Their broker tests are used directly as source material by AI models. Proactively supplying improvement evidence ahead of their next test influences the outcome.</p><p><strong>Action:</strong> Contact Stiftung Warentest ahead of their next scheduled broker test. Provide service improvement data and request the complaint narrative be updated.</p></div>
-    </details>
-
-    <details class="strat-item">
       <summary><span class="strat-title">Build a standing process for comparison site updates</span><span class="strat-meta"><span class="strat-badge">Medium</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Product changes at TR — rate updates, new features, fee changes — need to reach comparison sites within days or AI models quote outdated information for months. Currently there is no process for this.</p><p><strong>Action:</strong> Create a data pack template. Trigger it automatically on every product change. Send to top 10 comparison sites. Assign ownership to one person in Growth.</p></div>
+    </details>
+
+    <!-- Reddit r/Finanzen -->
+    <div class="strat-sub-label">Reddit r/Finanzen</div>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Establish an official TR presence on Reddit r/Finanzen</span><span class="strat-meta"><span class="strat-badge">High</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Reddit r/Finanzen sentiment on TR is 45% negative. There is no official TR presence, so complaints go unanswered and dominate threads. AI reads the full thread including replies — unanswered complaints carry more weight than answered ones.</p><p><strong>Action:</strong> Register a verified TR account. Respond factually (not promotionally) to active TR threads. Do not attempt to remove negative posts — dilute with accurate, helpful responses.</p></div>
     </details>
   </div>
 
