@@ -595,8 +595,8 @@
     <div class="strat-group-label internal">Internal · Technical</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Fix Help Centre JavaScript rendering</span><span class="strat-meta"><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>The Help Centre is a Nuxt single-page app. AI crawlers cannot execute JavaScript, so they are reading near-empty HTML. This means all Help Centre content is currently invisible to AI models regardless of what is written there.</p><p><strong>Action:</strong> Implement server-side rendering or static pre-render for all Help Centre pages.</p></div>
+      <summary><span class="strat-title">Migrate Help Centre from CSR to SSR</span><span class="strat-meta"><span class="strat-badge">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>The Help Centre is currently client-side rendered (CSR) — the page HTML is empty until JavaScript executes in the browser. AI crawlers do not run JavaScript, so every Help Centre page appears blank to them regardless of its content.</p><p><strong>Action:</strong> Migrate to server-side rendering (SSR) or static site generation (SSG) so that full page content is delivered in the initial HTML response. All Help Centre content then becomes readable by AI crawlers immediately.</p></div>
     </details>
 
     <details class="strat-item">
@@ -609,10 +609,6 @@
       <div class="strat-body"><p>Without schema, AI has to infer what TR is and what each product costs from prose. Organisation schema on the homepage establishes TR's identity. Product schema on Interest Account, ETF Savings Plan and Saveback pages gives AI exact rates, fees and conditions.</p><p><strong>Action:</strong> Add Organization schema to homepage. Add Product schema to three core product pages.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Whitelist AI crawlers explicitly in robots.txt</span><span class="strat-meta"><span class="strat-badge">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>The current wildcard <code>Allow: /</code> permits all bots including AI crawlers. However explicitly naming GPTBot, PerplexityBot, ClaudeBot and Google-Extended is best practice and future-proofs against any config change.</p><p><strong>Action:</strong> Add four named Allow entries to robots.txt — 30 minutes of work.</p></div>
-    </details>
   </div>
 
   <!-- INTERNAL · NON-TECHNICAL -->
@@ -639,10 +635,6 @@
       <div class="strat-body"><p>AI reads the first sentence of a page and stops. Current Help Centre pages likely open with marketing language. This returns nothing useful to AI models.</p><p><strong>Action:</strong> Rewrite the opening sentence of each top 20 Help Centre page to be a direct factual answer. Example: "Does TR charge custody fees?" → first sentence: "Trade Republic charges no custody fees."</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Create a fee comparison page and a customer service page</span><span class="strat-meta"><span class="strat-badge">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>TR currently has no owned content for AI to retrieve on fee queries or service queries. AI falls back to Reddit and Trustpilot — both currently negative on both topics.</p><p><strong>Action:</strong> (1) Fee comparison page: TR vs Degiro vs XTB, factual, German-first. (2) Customer service page: contact channels, SLAs, response times, the 1,000-agent investment. These become the pages AI cites instead.</p></div>
-    </details>
   </div>
 
   <!-- EXTERNAL -->
