@@ -836,62 +836,72 @@
 
   <!-- POSITION ANALYSIS -->
   <h3 style="margin-top:28px;">What our current position means in numbers</h3>
-  <p style="color:#888;font-size:0.83rem;margin-bottom:16px;">3.4M AI search TAM (2027) × 40% assumed TR appearance rate = <strong style="color:#e8e8e8;">1.36M searches where TR is named.</strong> Position distribution derived from April 2026 diagnostic (7 query types). Choice share per position is assumed.</p>
+  <p style="color:#888;font-size:0.83rem;margin-bottom:16px;">The 3.4M AI search TAM represents all broker-intent AI searches across TR's markets. TR does not appear in every one — some fraction are brand-specific or comparative queries where TR isn't mentioned. The table below models three scenarios for TR's appearance rate, derived from the April 2026 diagnostic (7 query types tested). Position distribution and choice share per rank are assumed based on standard search CTR decay.</p>
 
+  <style>
+    .scenario-tabs { display: flex; gap: 8px; margin-bottom: 0; }
+    .stab { padding: 7px 16px; border-radius: 6px 6px 0 0; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid #222; border-bottom: none; color: #666; background: #0d0d0d; }
+    .stab.active { background: #161616; color: #e8e8e8; border-color: #333; }
+    .scenario-panel { background: #161616; border: 1px solid #333; border-radius: 0 6px 6px 6px; padding: 20px; margin-bottom: 12px; }
+    .scenario-panel table { margin: 0; }
+  </style>
+
+  <!-- Conservative -->
+  <div class="scenario-tabs">
+    <div class="stab">Conservative — 50%</div>
+    <div class="stab">Audit-grounded — 71%</div>
+    <div class="stab">Optimistic — 90%</div>
+  </div>
+  <p style="color:#555;font-size:0.78rem;margin:8px 0 4px;">Three scenarios for the share of 3.4M AI broker searches where TR is named. 50% assumes a long tail of brand-specific queries where TR doesn't appear. 71% is derived from the diagnostic (TR appeared in 5 of 7 tested query types). 90% assumes TR appears in nearly all general broker-intent queries.</p>
+
+  <div style="overflow-x:auto; margin-top: 12px;">
   <table>
     <thead>
       <tr>
-        <th>TR's rank</th>
-        <th>Queries at this rank <span style="font-weight:400;color:#555;">(diagnostic)</span></th>
-        <th class="num">Share of 1.36M</th>
-        <th class="num">Choice share <span style="font-weight:400;color:#555;">(assumed)</span></th>
-        <th class="num">Est. customers/yr</th>
+        <th>Scenario</th>
+        <th>Appearance rate</th>
+        <th>Basis</th>
+        <th class="num">TR-named searches</th>
+        <th class="num">Current position yield</th>
+        <th class="num">7/7 first-place yield</th>
+        <th class="num">Uplift</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><strong>1st</strong></td>
-        <td>3 / 7 <span style="font-size:0.78rem;color:#666;">beginners · ETFs · general broker</span></td>
-        <td class="num">585k</td>
-        <td class="num">55%</td>
-        <td class="num" style="color:#2ecc71;font-weight:600;">~321k</td>
+        <td><strong>Conservative</strong></td>
+        <td>50%</td>
+        <td><span style="font-size:0.78rem;color:#666;">Includes long-tail brand/comparison queries</span></td>
+        <td class="num">1.70M</td>
+        <td class="num" style="color:#e67e22;">~510k</td>
+        <td class="num" style="color:#2ecc71;">~935k</td>
+        <td class="num" style="color:#2ecc71;">+425k <span style="font-size:0.75rem;color:#888;">(+12% OBCs)</span></td>
+      </tr>
+      <tr style="background:#111;">
+        <td><strong>Audit-grounded</strong></td>
+        <td>71%</td>
+        <td><span style="font-size:0.78rem;color:#666;">5 of 7 query types tested · April 2026</span></td>
+        <td class="num">2.41M</td>
+        <td class="num" style="color:#e67e22;">~726k</td>
+        <td class="num" style="color:#2ecc71;">~1.33M</td>
+        <td class="num" style="color:#2ecc71;">+604k <span style="font-size:0.75rem;color:#888;">(+17% OBCs)</span></td>
       </tr>
       <tr>
-        <td><strong>2nd</strong></td>
-        <td>1 / 7 <span style="font-size:0.78rem;color:#666;">best interest rate</span></td>
-        <td class="num">190k</td>
-        <td class="num">30%</td>
-        <td class="num" style="color:#f39c12;font-weight:600;">~57k</td>
-      </tr>
-      <tr>
-        <td><strong>3rd</strong></td>
-        <td>1 / 7 <span style="font-size:0.78rem;color:#666;">lowest fees</span></td>
-        <td class="num">190k</td>
-        <td class="num">15%</td>
-        <td class="num" style="color:#e67e22;font-weight:600;">~29k</td>
-      </tr>
-      <tr>
-        <td><strong>Not competitive</strong></td>
-        <td>2 / 7 <span style="font-size:0.78rem;color:#666;">customer service · banking</span></td>
-        <td class="num">395k</td>
-        <td class="num">0%</td>
-        <td class="num" style="color:#555;">0</td>
-      </tr>
-      <tr style="border-top: 1px solid #333;">
-        <td colspan="2"><strong>Total (current position)</strong></td>
-        <td class="num"><strong>1.36M</strong></td>
-        <td class="num">—</td>
-        <td class="num" style="color:#ffffff;font-weight:700;font-size:1.05rem;">~407k / yr</td>
+        <td><strong>Optimistic</strong></td>
+        <td>90%</td>
+        <td><span style="font-size:0.78rem;color:#666;">TR dominant across all general broker queries</span></td>
+        <td class="num">3.06M</td>
+        <td class="num" style="color:#e67e22;">~921k</td>
+        <td class="num" style="color:#2ecc71;">~1.68M</td>
+        <td class="num" style="color:#2ecc71;">+762k <span style="font-size:0.75rem;color:#888;">(+21% OBCs)</span></td>
       </tr>
     </tbody>
   </table>
-
-  <div class="callout" style="margin-top:8px;">
-    <strong>If TR ranked 1st across all 7 query types</strong> — 1.36M × 55% = <strong>~748k customers/yr</strong>, nearly double the current estimate. The gap is customer service and fees: fixing those two positions is worth ~340k additional customers per year at 2027 TAM scale.
   </div>
+  <p style="color:#555;font-size:0.75rem;margin-top:6px;">% uplift calculated against 2025 OBC base of 3.55M. Current position yield uses actual diagnostic ranking distribution (3/7 at 1st · 1/7 at 2nd · 1/7 at 3rd · 2/7 not competitive) with assumed choice shares of 55% / 30% / 15%.</p>
 
-  <div class="callout success" style="margin-top:8px;">
-    <strong>Bottom line:</strong> Moving from 3/7 to 7/7 first-place recommendations delivers an estimated <strong>+341k additional customers per year</strong> — a <strong>~10% uplift in annual OBCs</strong> on top of TR's 2025 base of 3.55M, at zero incremental media spend. No other acquisition channel offers that unit economics at this scale.
+  <div class="callout" style="margin-top:16px;">
+    <strong>Across all three scenarios,</strong> moving to 7/7 first-place recommendations delivers between <strong>+425k and +762k additional customers per year</strong>. The audit-grounded midpoint is <strong>+604k — a ~17% uplift in annual OBCs</strong> at zero incremental media spend. Even the conservative case (+12%) exceeds the impact of most paid campaigns at a fraction of the cost.
   </div>
 
 
