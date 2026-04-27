@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board — AI Search Strategy</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3250;
+    --accent: #5b6ef5;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --card-radius: 10px;
+
+    /* pillar colours */
+    --it: #818cf8;   /* Internal·Technical */
+    --in: #34d399;   /* Internal·Non-Technical */
+    --et: #f472b6;   /* External·Trustpilot */
+    --ee: #fb923c;   /* External·Editorial */
+    --ew: #60a5fa;   /* External·Wikipedia */
+    --ec: #a78bfa;   /* External·Comparison Sites */
+    --er: #facc15;   /* External·Reddit */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 8px; height: 52px; }
+  nav .brand { font-weight: 700; font-size: 15px; color: var(--text); margin-right: 16px; text-decoration: none; }
+  nav a { color: var(--muted); text-decoration: none; padding: 6px 14px; border-radius: 6px; font-size: 14px; transition: all 0.15s; }
+  nav a:hover, nav a.active { background: var(--surface2); color: var(--text); }
+
+  /* TOOLBAR */
+  .toolbar { padding: 16px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  .toggle-group { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .toggle-btn { padding: 7px 18px; font-size: 13px; font-weight: 600; border: none; background: none; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .toggle-btn.active { background: var(--accent); color: #fff; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #4a5de0; color: #fff; border-color: #4a5de0; }
+  .spacer { flex: 1; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* KANBAN */
+  #kanban { padding: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 800px) { #kanban { grid-template-columns: 1fr; } }
+  .column { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); }
+  .col-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .col-title { font-weight: 700; font-size: 14px; }
+  .col-count { background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .cards-list { padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 80px; }
+  .task-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; border-left: 3px solid transparent; }
+  .task-card:hover { border-color: var(--accent); }
+  .task-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+  .task-meta { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .priority-urgent { background: rgba(239,68,68,0.2); color: var(--red); }
+  .priority-high    { background: rgba(245,158,11,0.2); color: var(--amber); }
+  .priority-medium  { background: rgba(34,197,94,0.2); color: var(--green); }
+  .priority-low     { background: rgba(148,163,184,0.15); color: var(--muted); }
+  .task-dates { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .task-owner { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* GANTT */
+  #gantt { padding: 24px; display: none; overflow-x: auto; }
+  .gantt-wrap { min-width: 900px; }
+  .gantt-header { display: grid; margin-bottom: 8px; }
+  .gantt-row { display: grid; align-items: center; margin-bottom: 4px; min-height: 36px; }
+  .gantt-task-label { padding: 0 12px; font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .gantt-task-label:hover { color: var(--accent); }
+  .gantt-bar-cell { position: relative; height: 100%; display: flex; align-items: center; }
+  .gantt-bar { height: 24px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 4px; }
+  .gantt-month-label { text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; border-left: 1px solid var(--border); padding: 4px 0; }
+  .gantt-grid-line { border-left: 1px dashed var(--border); height: 100%; position: absolute; top: 0; }
+  .today-line { border-left: 2px solid var(--accent); height: 100%; position: absolute; top: 0; z-index: 2; opacity: 0.7; }
+  .gantt-bg-row { position: absolute; inset: 0; display: grid; pointer-events: none; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 520px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 17px; margin-bottom: 20px; }
+  .form-row { margin-bottom: 14px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  input, select, textarea { width: 100%; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit; }
+  textarea { resize: vertical; min-height: 60px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  select option { background: var(--surface2); }
+  .modal-footer { display: flex; gap: 10px; justify-content: space-between; margin-top: 20px; }
+  .delete-btn-modal { background: none; border: 1px solid var(--border); color: var(--red); cursor: pointer; padding: 7px 14px; border-radius: 8px; font-size: 13px; }
+  .delete-btn-modal:hover { background: rgba(239,68,68,0.1); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="brand">AI Search Strategy</a>
+  <a href="index.html">Strategy</a>
+  <a href="board.html" class="active">Board</a>
+  <a href="monitor.html">Monitor</a>
+</nav>
+
+<div class="toolbar">
+  <div class="toggle-group">
+    <button class="toggle-btn active" id="btn-kanban" onclick="switchView('kanban')">Kanban</button>
+    <button class="toggle-btn" id="btn-gantt" onclick="switchView('gantt')">Gantt</button>
+  </div>
+  <button class="btn btn-primary" onclick="openNewTask()">+ Add Task</button>
+  <div class="spacer"></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<div id="kanban"></div>
+<div id="gantt"></div>
+
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal">
+    <h3 id="modal-title">Task</h3>
+    <div class="form-row">
+      <label>Title</label>
+      <input type="text" id="tf-title">
+    </div>
+    <div class="form-grid-2">
+      <div>
+        <label>Pillar</label>
+        <select id="tf-pillar">
+          <option>Internal·Technical</option>
+          <option>Internal·Non-Technical</option>
+          <option>External·Trustpilot</option>
+          <option>External·Editorial</option>
+          <option>External·Wikipedia</option>
+          <option>External·Comparison Sites</option>
+          <option>External·Reddit</option>
+        </select>
+      </div>
+      <div>
+        <label>Priority</label>
+        <select id="tf-priority">
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div>
+        <label>Status</label>
+        <select id="tf-status">
+          <option value="not_started">Not Started</option>
+          <option value="in_progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div>
+        <label>Owner</label>
+        <input type="text" id="tf-owner" placeholder="Name or team">
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div>
+        <label>Start Date</label>
+        <input type="date" id="tf-start">
+      </div>
+      <div>
+        <label>End Date</label>
+        <input type="date" id="tf-end">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Notes</label>
+      <textarea id="tf-notes" rows="2"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="delete-btn-modal" id="modal-delete" onclick="deleteTask()" style="display:none">Delete</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTask()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DEFAULT TASKS
+// ============================================================
+const DEFAULT_TASKS = [
+  // Internal · Technical (3)
+  { id: 't1',  title: 'Build brand entity schema (JSON-LD) on website',         pillar: 'Internal·Technical',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
+  { id: 't2',  title: 'Submit site to Google for AI Overview indexing',          pillar: 'Internal·Technical',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-20', notes: '' },
+  { id: 't3',  title: 'Implement FAQ schema on key product pages',               pillar: 'Internal·Technical',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-15', notes: '' },
+  // Internal · Non-Technical (6)
+  { id: 't4',  title: 'Produce "best broker Germany" comparison landing page',   pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't5',  title: 'Write authoritative FAQ content for 7 target queries',   pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't6',  title: 'Build Trustpilot review invite feedback loop for CX',    pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't7',  title: 'Launch Friends & Family push for Trustpilot reviews',    pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
+  { id: 't8',  title: 'Refresh help-centre articles with AI-scannable format',  pillar: 'Internal·Non-Technical',      priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't9',  title: 'Brief comms team on AI citation best practices',         pillar: 'Internal·Non-Technical',      priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-06-30', notes: '' },
+  // External · Trustpilot (1)
+  { id: 't10', title: 'Drive Trustpilot score from 3.3★ to 4.0★',              pillar: 'External·Trustpilot',         priority: 'urgent', status: 'in_progress', owner: '', start: '2026-05-01', end: '2026-12-31', notes: '' },
+  // External · Editorial (5)
+  { id: 't11', title: 'Pitch guest posts to German fintech publications',        pillar: 'External·Editorial',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't12', title: 'Secure coverage in Finanztip as top broker pick',        pillar: 'External·Editorial',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-07-31', notes: '' },
+  { id: 't13', title: 'Build relationships with 3 key finance YouTubers',       pillar: 'External·Editorial',          priority: 'high',   status: 'not_started', owner: '', start: '2026-06-01', end: '2026-08-31', notes: '' },
+  { id: 't14', title: 'Issue data-led press release on retail investing trends', pillar: 'External·Editorial',          priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-07-31', notes: '' },
+  { id: 't15', title: 'Sponsor or contribute to German fintech podcast',         pillar: 'External·Editorial',          priority: 'medium', status: 'not_started', owner: '', start: '2026-07-01', end: '2026-09-30', notes: '' },
+  // External · Wikipedia (1)
+  { id: 't16', title: 'Review and expand Trade Republic Wikipedia article',      pillar: 'External·Wikipedia',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-15', notes: '' },
+  // External · Comparison Sites (5)
+  { id: 't17', title: 'Claim and optimise Broker Chooser profile',              pillar: 'External·Comparison Sites',   priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't18', title: 'Claim and optimise Finanzfluss profile',                 pillar: 'External·Comparison Sites',   priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't19', title: 'Audit and correct info on Brokervergleich.de',           pillar: 'External·Comparison Sites',   priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't20', title: 'Engage with justETF.com to list TR ETF products',        pillar: 'External·Comparison Sites',   priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-07-31', notes: '' },
+  { id: 't21', title: 'Submit TR data to Robo-Advisor Protal comparison',       pillar: 'External·Comparison Sites',   priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-07-31', notes: '' },
+  // External · Reddit (5)
+  { id: 't22', title: 'Set up monitoring for r/Finanzen TR mentions',           pillar: 'External·Reddit',             priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
+  { id: 't23', title: 'Respond to top 10 "best broker" threads on r/Finanzen',  pillar: 'External·Reddit',             priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't24', title: 'Create helpful wiki contribution on r/Finanzen',         pillar: 'External·Reddit',             priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't25', title: 'Host AMA with TR team on r/Finanzen',                   pillar: 'External·Reddit',             priority: 'medium', status: 'not_started', owner: '', start: '2026-07-01', end: '2026-08-31', notes: '' },
+  { id: 't26', title: 'Produce monthly Reddit sentiment report for team',       pillar: 'External·Reddit',             priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-12-31', notes: '' },
+];
+
+const PILLAR_COLORS = {
+  'Internal·Technical':        '#818cf8',
+  'Internal·Non-Technical':    '#34d399',
+  'External·Trustpilot':       '#f472b6',
+  'External·Editorial':        '#fb923c',
+  'External·Wikipedia':        '#60a5fa',
+  'External·Comparison Sites': '#a78bfa',
+  'External·Reddit':           '#facc15',
+};
+
+const STATUS_COLS = [
+  { key: 'not_started', label: 'Not Started' },
+  { key: 'in_progress', label: 'In Progress' },
+  { key: 'done',        label: 'Done' },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+function loadTasks() {
+  const s = localStorage.getItem('board_tasks');
+  return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_TASKS));
+}
+function saveTasks() { localStorage.setItem('board_tasks', JSON.stringify(tasks)); }
+let tasks = loadTasks();
+let editingId = null;
+
+// ============================================================
+// KANBAN
+// ============================================================
+function renderKanban() {
+  let html = '';
+  STATUS_COLS.forEach(col => {
+    const colTasks = tasks.filter(t => t.status === col.key);
+    const cards = colTasks.map(t => `
+      <div class="task-card" onclick="openEditTask('${t.id}')" style="border-left-color:${PILLAR_COLORS[t.pillar] || '#888'}">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">
+          <span class="tag priority-${t.priority}">${t.priority}</span>
+          <span class="tag" style="background:${PILLAR_COLORS[t.pillar]}22;color:${PILLAR_COLORS[t.pillar]}">${t.pillar}</span>
+        </div>
+        ${t.start || t.end ? `<div class="task-dates">${t.start || ''}${t.end ? ' → ' + t.end : ''}</div>` : ''}
+        ${t.owner ? `<div class="task-owner">👤 ${t.owner}</div>` : ''}
+      </div>`).join('');
+    html += `
+      <div class="column">
+        <div class="col-header">
+          <span class="col-title">${col.label}</span>
+          <span class="col-count">${colTasks.length}</span>
+        </div>
+        <div class="cards-list">${cards}</div>
+      </div>`;
+  });
+  document.getElementById('kanban').innerHTML = html;
+}
+
+// ============================================================
+// GANTT
+// ============================================================
+function renderGantt() {
+  const el = document.getElementById('gantt');
+  // Determine date range
+  const GANTT_START = new Date('2026-05-01');
+  const GANTT_END   = new Date('2026-12-31');
+  const totalDays = Math.round((GANTT_END - GANTT_START) / 86400000);
+
+  // Build month headers
+  const months = [];
+  let cur = new Date(GANTT_START);
+  while (cur <= GANTT_END) {
+    const label = cur.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+    const start = Math.round((cur - GANTT_START) / 86400000);
+    const next = new Date(cur); next.setMonth(next.getMonth() + 1);
+    const days = Math.round((Math.min(next, GANTT_END) - cur) / 86400000);
+    months.push({ label, startDay: start, days });
+    cur = next;
+  }
+
+  const LABEL_W = 220;
+  const COL_TOTAL = 800; // px for the timeline
+  const pxPerDay = COL_TOTAL / totalDays;
+  const TODAY_OFFSET = Math.max(0, Math.round((new Date() - GANTT_START) / 86400000));
+
+  // Header
+  let headerHTML = `<div class="gantt-header" style="display:grid;grid-template-columns:${LABEL_W}px 1fr">
+    <div></div>
+    <div style="position:relative;display:flex">`;
+  months.forEach(m => {
+    headerHTML += `<div class="gantt-month-label" style="width:${m.days * pxPerDay}px;flex-shrink:0">${m.label}</div>`;
+  });
+  headerHTML += '</div></div>';
+
+  // Rows
+  let rowsHTML = '';
+  tasks.forEach(t => {
+    const color = PILLAR_COLORS[t.pillar] || '#888';
+    let barLeft = 0, barWidth = 0;
+    if (t.start && t.end) {
+      const s = new Date(t.start), e = new Date(t.end);
+      barLeft = Math.max(0, Math.round((s - GANTT_START) / 86400000)) * pxPerDay;
+      const endOffset = Math.min(totalDays, Math.round((e - GANTT_START) / 86400000));
+      barWidth = Math.max(4, (endOffset * pxPerDay) - barLeft);
+    }
+    const opacity = t.status === 'done' ? 0.4 : 1;
+    rowsHTML += `
+      <div class="gantt-row" style="display:grid;grid-template-columns:${LABEL_W}px 1fr;border-bottom:1px solid #1e2235">
+        <div class="gantt-task-label" onclick="openEditTask('${t.id}')" title="${t.title}">${t.title}</div>
+        <div style="position:relative;height:36px;display:flex;align-items:center">
+          ${months.map(m => `<div class="gantt-grid-line" style="left:${m.startDay * pxPerDay}px"></div>`).join('')}
+          <div class="today-line" style="left:${TODAY_OFFSET * pxPerDay}px"></div>
+          ${barLeft !== undefined && barWidth > 0 ? `
+          <div class="gantt-bar" style="position:absolute;left:${barLeft}px;width:${barWidth}px;background:${color};opacity:${opacity}" onclick="openEditTask('${t.id}')">
+            ${barWidth > 60 ? t.title.slice(0,30) : ''}
+          </div>` : `<span style="font-size:11px;color:var(--muted);padding-left:8px">No dates set</span>`}
+        </div>
+      </div>`;
+  });
+
+  el.innerHTML = `<div class="gantt-wrap">${headerHTML}<div>${rowsHTML}</div></div>`;
+}
+
+// ============================================================
+// LEGEND
+// ============================================================
+function renderLegend() {
+  const html = Object.entries(PILLAR_COLORS).map(([p, c]) =>
+    `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div>${p}</div>`
+  ).join('');
+  document.getElementById('legend').innerHTML = html;
+}
+
+// ============================================================
+// VIEW TOGGLE
+// ============================================================
+let currentView = 'kanban';
+function switchView(v) {
+  currentView = v;
+  document.getElementById('kanban').style.display = v === 'kanban' ? 'grid' : 'none';
+  document.getElementById('gantt').style.display  = v === 'gantt'  ? 'block' : 'none';
+  document.getElementById('btn-kanban').classList.toggle('active', v === 'kanban');
+  document.getElementById('btn-gantt').classList.toggle('active', v === 'gantt');
+  if (v === 'gantt') renderGantt();
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openNewTask() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'New Task';
+  document.getElementById('modal-delete').style.display = 'none';
+  document.getElementById('tf-title').value = '';
+  document.getElementById('tf-pillar').value = 'Internal·Technical';
+  document.getElementById('tf-priority').value = 'medium';
+  document.getElementById('tf-status').value = 'not_started';
+  document.getElementById('tf-owner').value = '';
+  document.getElementById('tf-start').value = '';
+  document.getElementById('tf-end').value = '';
+  document.getElementById('tf-notes').value = '';
+  document.getElementById('task-modal').classList.add('open');
+}
+
+function openEditTask(id) {
+  editingId = id;
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('modal-title').textContent = 'Edit Task';
+  document.getElementById('modal-delete').style.display = 'inline-block';
+  document.getElementById('tf-title').value = t.title;
+  document.getElementById('tf-pillar').value = t.pillar;
+  document.getElementById('tf-priority').value = t.priority;
+  document.getElementById('tf-status').value = t.status;
+  document.getElementById('tf-owner').value = t.owner || '';
+  document.getElementById('tf-start').value = t.start || '';
+  document.getElementById('tf-end').value = t.end || '';
+  document.getElementById('tf-notes').value = t.notes || '';
+  document.getElementById('task-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('task-modal').classList.remove('open'); }
+
+function saveTask() {
+  const t = {
+    id: editingId || 't' + Date.now(),
+    title: document.getElementById('tf-title').value.trim(),
+    pillar: document.getElementById('tf-pillar').value,
+    priority: document.getElementById('tf-priority').value,
+    status: document.getElementById('tf-status').value,
+    owner: document.getElementById('tf-owner').value.trim(),
+    start: document.getElementById('tf-start').value,
+    end: document.getElementById('tf-end').value,
+    notes: document.getElementById('tf-notes').value.trim(),
+  };
+  if (!t.title) { alert('Please enter a title.'); return; }
+  if (editingId) {
+    const idx = tasks.findIndex(x => x.id === editingId);
+    if (idx >= 0) tasks[idx] = t;
+  } else {
+    tasks.push(t);
+  }
+  saveTasks();
+  closeModal();
+  renderAll();
+}
+
+function deleteTask() {
+  if (!editingId || !confirm('Delete this task?')) return;
+  tasks = tasks.filter(t => t.id !== editingId);
+  saveTasks();
+  closeModal();
+  renderAll();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function renderAll() {
+  renderLegend();
+  renderKanban();
+  if (currentView === 'gantt') renderGantt();
+}
+
+// Click outside modal to close
+document.getElementById('task-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+renderAll();
+</script>
+</body>
+</html>
