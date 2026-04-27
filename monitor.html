@@ -171,7 +171,7 @@
       <thead>
         <tr>
           <th>Date</th><th>Score</th><th>Total Reviews</th><th>28d Volume</th>
-          <th>Avg Incoming</th><th>5★</th><th>4★</th><th>3★</th><th>2★</th><th>1★</th><th></th>
+          <th>Avg Incoming</th><th>5★:1★</th><th>5★</th><th>4★</th><th>3★</th><th>2★</th><th>1★</th><th></th>
         </tr>
       </thead>
       <tbody id="data-table-body"></tbody>
@@ -330,17 +330,56 @@ function projectScore(startScore, totalReviews, nNew, avgNew) {
   return (startScore * totalReviews + avgNew * nNew) / (totalReviews + nNew);
 }
 
-function forecastETA(startScore, totalReviews, dailyRate, avgNew, target = 4.0) {
-  if (avgNew <= target) return null; // unreachable
-  const nNeeded = totalReviews * (target - startScore) / (avgNew - target);
-  const daysNeeded = nNeeded / dailyRate;
-  const eta = new Date('2026-04-27');
-  eta.setDate(eta.getDate() + Math.round(daysNeeded));
-  return { days: Math.round(daysNeeded), eta, nNeeded: Math.round(nNeeded) };
-}
-
 function formatDate(d) {
   return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+}
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr); d.setDate(d.getDate() + Math.round(n)); return d;
+}
+
+// Linear regression on [{x, y}] returns {slope, intercept}
+function linearRegression(pts) {
+  const n = pts.length;
+  if (n < 2) return { slope: 0, intercept: pts[0]?.y || 0 };
+  const sx = pts.reduce((s, p) => s + p.x, 0);
+  const sy = pts.reduce((s, p) => s + p.y, 0);
+  const sxy = pts.reduce((s, p) => s + p.x * p.y, 0);
+  const sx2 = pts.reduce((s, p) => s + p.x * p.x, 0);
+  const slope = (n * sxy - sx * sy) / (n * sx2 - sx * sx);
+  return { slope, intercept: (sy - slope * sx) / n };
+}
+
+// Returns {slope ★/day, lastAvg, projAt(daysFromLatest) -> projected incoming avg}
+function getIncomingTrend() {
+  if (tpData.length < 2) return null;
+  const base = new Date(tpData[0].date);
+  const pts = tpData.map(dp => ({
+    x: Math.round((new Date(dp.date) - base) / 86400000),
+    y: calcAvgIncoming(dp),
+  })).filter(p => p.y !== null);
+  if (pts.length < 2) return null;
+  const last = pts[pts.length - 1];
+  const { slope, intercept } = linearRegression(pts);
+  return {
+    slope,
+    lastAvg: last.y,
+    daysTo4: slope > 0 ? (4.0 - last.y) / slope : null,
+    projAt: (daysFromLatest) => Math.min(4.95, Math.max(1, intercept + slope * (last.x + daysFromLatest))),
+  };
+}
+
+// Day-by-day simulation using a dynamic avg function; returns {path:[{day,score}], eta4 (days|null)}
+function simulateScore(startScore, totalReviews, dailyRate, avgFn, maxDays) {
+  let score = startScore, total = totalReviews, eta4 = null;
+  const path = [{ day: 0, score }];
+  for (let d = 1; d <= maxDays; d++) {
+    score = (score * total + avgFn(d) * dailyRate) / (total + dailyRate);
+    total += dailyRate;
+    if (!eta4 && score >= 4.0) eta4 = d;
+    if (d % 30 === 0) path.push({ day: d, score: +score.toFixed(4) });
+  }
+  return { path, eta4 };
 }
 
 // ============================================================
@@ -351,18 +390,28 @@ function renderCards() {
   const latest = tpData[tpData.length - 1];
   const prev = tpData.length > 1 ? tpData[tpData.length - 2] : null;
   const avgIncoming = calcAvgIncoming(latest);
-
-  const plateau = avgIncoming ? (avgIncoming * latest.totalReviews / (latest.totalReviews + 1)).toFixed(2) : '—';
+  const prevAvg = prev ? calcAvgIncoming(prev) : null;
   const scoreDelta = prev ? (latest.score - prev.score).toFixed(1) : null;
+  const trend = getIncomingTrend();
+
+  // 5★:1★ ratio
+  const ratio = latest.dist[1] > 0 ? (latest.dist[5] / latest.dist[1]).toFixed(2) : '—';
+  const prevRatio = prev && prev.dist[1] > 0 ? (prev.dist[5] / prev.dist[1]).toFixed(2) : null;
+  const ratioDelta = prevRatio ? (parseFloat(ratio) - parseFloat(prevRatio)).toFixed(2) : null;
+  const ratioClass = parseFloat(ratio) >= 2.0 ? 'good' : parseFloat(ratio) >= 1.0 ? 'warn' : 'bad';
+
+  const trendText = trend ? (trend.slope > 0 ? `+${trend.slope.toFixed(3)}★/day` : `${trend.slope.toFixed(3)}★/day`) : '—';
+  const trendClass = !trend ? 'neutral' : trend.slope >= 0.05 ? 'good' : trend.slope > 0 ? 'warn' : 'bad';
 
   document.getElementById('last-updated').textContent = latest.date;
 
   const scoreClass = latest.score >= 4.0 ? 'good' : latest.score >= 3.5 ? 'warn' : 'bad';
   const incomingClass = !avgIncoming ? 'neutral' : avgIncoming >= 4.0 ? 'good' : avgIncoming >= 3.5 ? 'warn' : 'bad';
+  const avgDelta = avgIncoming && prevAvg ? (avgIncoming - prevAvg).toFixed(2) : null;
 
   document.getElementById('summary-cards').innerHTML = `
     <div class="card ${scoreClass}">
-      <div class="card-label">Current Score</div>
+      <div class="card-label">Trustpilot Score</div>
       <div class="card-value">${latest.score.toFixed(1)}★</div>
       <div class="card-sub">${scoreDelta !== null ? (scoreDelta >= 0 ? '+' : '') + scoreDelta + ' vs prior' : 'First entry'}</div>
     </div>
@@ -374,17 +423,22 @@ function renderCards() {
     <div class="card neutral">
       <div class="card-label">28d Volume</div>
       <div class="card-value">${latest.volume28d.toLocaleString()}</div>
-      <div class="card-sub">Reviews in last 28 days</div>
+      <div class="card-sub">~${Math.round(latest.volume28d / 28)}/day avg</div>
     </div>
     <div class="card ${incomingClass}">
       <div class="card-label">Avg Incoming ★</div>
       <div class="card-value">${avgIncoming ? avgIncoming.toFixed(2) + '★' : '—'}</div>
-      <div class="card-sub">Need >4.0 to reach 4.0</div>
+      <div class="card-sub">${avgDelta ? (avgDelta >= 0 ? '+' : '') + avgDelta + ' vs prior · need >4.0' : 'Need >4.0 to reach target'}</div>
     </div>
-    <div class="card ${avgIncoming && avgIncoming > 4 ? 'good' : 'bad'}">
-      <div class="card-label">Projected Plateau</div>
-      <div class="card-value" style="font-size:20px">${avgIncoming ? avgIncoming.toFixed(2) + '★' : '—'}</div>
-      <div class="card-sub">${avgIncoming && avgIncoming > 4.0 ? '4.0 is reachable ✓' : '4.0 unreachable at current avg'}</div>
+    <div class="card ${trendClass}">
+      <div class="card-label">Incoming Avg Trend</div>
+      <div class="card-value" style="font-size:20px">${trendText}</div>
+      <div class="card-sub">${trend && trend.daysTo4 ? (trend.daysTo4 > 0 ? '4.0★ incoming in ~' + Math.round(trend.daysTo4) + 'd' : 'Already at 4.0★') : '—'}</div>
+    </div>
+    <div class="card ${ratioClass}">
+      <div class="card-label">5★ : 1★ Ratio</div>
+      <div class="card-value">${ratio}×</div>
+      <div class="card-sub">${ratioDelta ? (ratioDelta >= 0 ? '+' : '') + ratioDelta + ' vs prior · target >4×' : '5★ for every 1★'}</div>
     </div>
   `;
 }
@@ -443,14 +497,33 @@ function renderCharts() {
     }
   });
 
-  // Incoming chart
+  // Incoming chart — actual data + trend projection
   destroyChart('incomingChart');
+  const trend = getIncomingTrend();
+  // Build projection labels: extend 14 days past latest
+  const projDays = 21;
+  const extLabels = [...labels];
+  const projIncoming = incoming.map(v => null); // null for actual points in proj dataset
+  for (let i = 1; i <= projDays; i++) {
+    const d = new Date(latest.date); d.setDate(d.getDate() + i);
+    extLabels.push(d.toISOString().slice(0,10));
+    projIncoming.push(null);
+  }
+  // Trend line: starts from first actual point
+  const trendLine = extLabels.map((_, i) => {
+    if (!trend) return null;
+    const daysFromLatest = i - (labels.length - 1);
+    return Math.min(4.95, Math.max(1, trend.projAt(daysFromLatest)));
+  });
+  // Actual incoming with null fill for projection period
+  const actualIncoming = [...incoming, ...Array(projDays).fill(null)];
   charts['incomingChart'] = new Chart(document.getElementById('incomingChart'), {
     type: 'line',
     data: {
-      labels,
+      labels: extLabels,
       datasets: [{
-        data: incoming,
+        label: 'Actual avg incoming',
+        data: actualIncoming,
         borderColor: '#22d3ee',
         backgroundColor: 'rgba(34,211,238,0.1)',
         fill: true,
@@ -458,13 +531,23 @@ function renderCharts() {
         pointRadius: 5,
         pointBackgroundColor: '#22d3ee',
       }, {
-        data: labels.map(() => 4.0),
+        label: 'Trend projection',
+        data: trendLine,
+        borderColor: 'rgba(34,211,238,0.45)',
+        borderDash: [5,4],
+        pointRadius: 0,
+        fill: false,
+      }, {
+        label: '4.0 target',
+        data: extLabels.map(() => 4.0),
         borderColor: 'rgba(34,197,94,0.4)',
         borderDash: [6,4],
         pointRadius: 0,
+        fill: false,
       }]
     },
     options: { ...CHART_DEFAULTS,
+      plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } } },
       scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, min: 1, max: 5, ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#2e3250' } } }
     }
   });
@@ -509,86 +592,80 @@ function renderCharts() {
 function renderForecast() {
   if (!tpData.length) return;
   const latest = tpData[tpData.length - 1];
-  const avgIncoming = calcAvgIncoming(latest);
+  const trend = getIncomingTrend();
   const dailyRate = latest.volume28d / 28;
+  const fallbackAvg = calcAvgIncoming(latest) || 3.69;
 
-  const scenarios = [
-    {
-      id: 'current',
-      label: 'Current Trajectory',
-      rate: dailyRate,
-      avgNew: avgIncoming || 3.69,
-      desc: `${Math.round(dailyRate)} reviews/day at ${avgIncoming ? avgIncoming.toFixed(2) : '3.69'}★ avg`,
-    },
-    {
-      id: 'a',
-      label: 'Scenario A — Invite Campaign',
-      rate: 100,
-      avgNew: 4.5,
-      desc: '100 reviews/day at 4.5★ avg (active invite campaign)',
-    },
-    {
-      id: 'b',
-      label: 'Scenario B — Friends & Family',
-      rate: 200,
-      avgNew: 4.8,
-      desc: '200 reviews/day at 4.8★ avg (F&F push + CX loop)',
-    },
-  ];
+  // avgFn: uses trend extrapolation if available, else flat current avg
+  const avgFn = trend ? trend.projAt : () => fallbackAvg;
 
-  let html = '';
-  scenarios.forEach(sc => {
-    const result = forecastETA(latest.score, latest.totalReviews, sc.rate, sc.avgNew);
-    const etaText = result ? formatDate(result.eta) : 'Unreachable';
-    const reviewsText = result ? `~${result.nNeeded.toLocaleString()} new reviews needed` : `Incoming avg must be >4.0★`;
-    html += `
-      <div class="scenario-card ${sc.id}">
-        <div class="sc-label">${sc.label}</div>
-        <div class="sc-eta">${etaText}</div>
-        <div class="sc-detail">${sc.desc}<br>${reviewsText}</div>
-      </div>`;
-  });
-  document.getElementById('scenario-cards').innerHTML = html;
-
-  // Forecast chart
-  destroyChart('forecastChart');
-  const months = 36;
-  const chartLabels = [];
-  const datasets = [];
-  const colors = { current: '#ef4444', a: '#f59e0b', b: '#22c55e' };
-
-  // Generate monthly points
-  for (let m = 0; m <= months; m++) {
-    const d = new Date('2026-04-27');
-    d.setMonth(d.getMonth() + m);
-    chartLabels.push(d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }));
+  // Incoming avg hits 4.0 insight
+  let insightHtml = '';
+  if (trend && trend.daysTo4 !== null && trend.slope > 0) {
+    const eta4Date = addDays(latest.date, trend.daysTo4);
+    insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.7">
+      <strong style="color:var(--green)">Incoming avg trending at +${trend.slope.toFixed(3)}★/day</strong><br>
+      Projected to reach 4.0★ around <strong>${eta4Date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong>
+      — but ${latest.totalReviews.toLocaleString()} existing reviews dilute the score slowly.
+      <strong>Volume is the lever:</strong> more reviews/day = faster score movement.
+    </div>`;
+  } else if (trend && trend.slope <= 0) {
+    insightHtml = `<div style="background:#1a1212;border:1px solid var(--red);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px">
+      <strong style="color:var(--red)">Warning:</strong> Incoming avg trend is flat or declining. Add more data points to confirm.
+    </div>`;
   }
 
-  scenarios.forEach(sc => {
-    const pts = [];
-    const totalDays = months * 30;
-    for (let m = 0; m <= months; m++) {
-      const days = m * 30;
-      const nNew = days * sc.rate;
-      const s = projectScore(latest.score, latest.totalReviews, nNew, sc.avgNew);
-      pts.push(Math.min(5, +s.toFixed(3)));
-    }
-    datasets.push({
-      label: sc.label,
-      data: pts,
-      borderColor: colors[sc.id],
-      backgroundColor: 'transparent',
-      tension: 0.4,
-      pointRadius: 0,
-      borderWidth: 2,
-    });
+  const scenarios = [
+    { id: 'current', label: 'Current trajectory',    rate: dailyRate, color: 'current',
+      desc: `${Math.round(dailyRate)} reviews/day · quality follows trend` },
+    { id: 'a',       label: 'Invite campaign',        rate: 100,       color: 'a',
+      desc: '100 reviews/day · quality follows trend' },
+    { id: 'b',       label: 'F&F push + CX loop',     rate: 300,       color: 'b',
+      desc: '300 reviews/day · quality follows trend' },
+  ];
+
+  const MAX_SIM = 2555; // 7 years
+  let scenarioResults = scenarios.map(sc => {
+    const { path, eta4 } = simulateScore(latest.score, latest.totalReviews, sc.rate, avgFn, MAX_SIM);
+    return { ...sc, path, eta4 };
   });
 
-  // Target line
+  let cardsHtml = insightHtml;
+  scenarioResults.forEach(sc => {
+    const etaDate = sc.eta4 ? addDays(latest.date, sc.eta4) : null;
+    const etaText = etaDate ? formatDate(etaDate) : '5+ years';
+    const daysText = sc.eta4 ? `~${sc.eta4.toLocaleString()} days away` : 'Beyond 7-year horizon';
+    cardsHtml += `
+      <div class="scenario-card ${sc.color}">
+        <div class="sc-label">${sc.label}</div>
+        <div class="sc-eta">${etaText}</div>
+        <div class="sc-detail">${sc.desc}<br>${daysText}</div>
+      </div>`;
+  });
+  document.getElementById('scenario-cards').innerHTML = cardsHtml;
+
+  // Forecast chart — build monthly x-axis up to 5 years
+  destroyChart('forecastChart');
+  const CHART_MONTHS = 60;
+  const chartLabels = [];
+  for (let m = 0; m <= CHART_MONTHS; m++) {
+    const d = new Date(latest.date); d.setMonth(d.getMonth() + m);
+    chartLabels.push(d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }));
+  }
+  const colors = { current: '#ef4444', a: '#f59e0b', b: '#22c55e' };
+  const datasets = scenarioResults.map(sc => ({
+    label: sc.label,
+    data: sc.path.map(p => p.score),
+    borderColor: colors[sc.color],
+    backgroundColor: 'transparent',
+    tension: 0.4,
+    pointRadius: 0,
+    borderWidth: 2,
+  }));
   datasets.push({
-    label: '4.0 Target',
+    label: '4.0 target',
     data: chartLabels.map(() => 4.0),
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.18)',
     borderDash: [8, 5],
     pointRadius: 0,
     borderWidth: 1,
@@ -599,15 +676,10 @@ function renderForecast() {
     data: { labels: chartLabels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 20, padding: 16 }
-        }
-      },
+      plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 18, padding: 14 } } },
       scales: {
         x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 10 }, maxTicksLimit: 12 } },
-        y: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } }, min: 3.0, max: 5.0 }
+        y: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } }, min: 3.0, max: 4.5 }
       }
     }
   });
@@ -622,12 +694,14 @@ function renderDataTable() {
     const idx = tpData.length - 1 - ri;
     const avg = calcAvgIncoming(dp);
     const d = dp.dist;
+    const ratio = d[1] > 0 ? (d[5]/d[1]).toFixed(2) + '×' : '—';
     return `<tr>
       <td>${dp.date}</td>
       <td>${dp.score.toFixed(1)}</td>
       <td>${dp.totalReviews.toLocaleString()}</td>
       <td>${dp.volume28d.toLocaleString()}</td>
       <td>${avg ? avg.toFixed(2) + '★' : '—'}</td>
+      <td style="color:${parseFloat(ratio)>=2?'#22c55e':parseFloat(ratio)>=1?'#f59e0b':'#ef4444'}">${ratio}</td>
       <td>${d[5]}</td><td>${d[4]}</td><td>${d[3]}</td><td>${d[2]}</td><td>${d[1]}</td>
       <td><button class="delete-btn" onclick="deleteDP(${idx})" title="Delete">✕</button></td>
     </tr>`;
