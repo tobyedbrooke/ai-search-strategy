@@ -156,28 +156,28 @@
   <h2>1. Executive Summary</h2>
   <p class="section-sub">Why this matters and what we're proposing</p>
 
-  <p>AI models — ChatGPT, Gemini, Claude — now directly answer the questions that send people to brokers. TR is already well-positioned in some areas: <strong>#1 for beginners and ETF savings plans</strong> across all three platforms. But we rank <strong>5th for customer service</strong> and <strong>3rd–5th for fees and banking queries</strong>, and our <strong>Trustpilot score of 3.3</strong> is the primary reason — it is the single input AI models use to answer trust questions about us. Of TR's <strong>3.55M new customers in 2025</strong>, an estimated <strong>~1.8M arrived via search</strong>. With AI projected to handle <strong>40% of all search by 2027</strong> — a TAM of 3.4M new accounts — being consistently recommended is not a nice-to-have. AI responses typically name 3–5 brokers and nothing else. You are either in that list or you are not.</p>
+  <p>The way customers find brokers has fundamentally shifted. With AI assistants now answering investment questions directly, the question is no longer how we find customers — it is whether customers can find us. In 2025, at least <strong>900,000 new accounts were directly attributed to Google Search</strong>; the true figure, accounting for iOS attribution gaps, is closer to <strong>1.8M</strong>. By 2027, AI is forecast to handle <strong>40% of all search</strong> — a TAM of <strong>3.4M new broker accounts per year</strong> across our markets. The #1 AI recommendation captures the majority of those clickthroughs. Today, TR ranks <strong>#1 for beginners and ETF savings plans</strong> across ChatGPT, Gemini, and Claude. But we rank <strong>5th for customer service</strong> and <strong>behind Trading212 on interest and fees</strong>. This document sets out the strategy to close those gaps and own the #1 position across every high-intent query.</p>
 
   <div class="metric-grid">
     <div class="metric-card highlight">
-      <div class="metric-value">3.55M</div>
-      <div class="metric-label">New customers in 2025</div>
-      <div class="metric-source">KYC completions · 7 markets · Internal</div>
+      <div class="metric-value">~1.8M</div>
+      <div class="metric-label">New OBCs in 2025 via search</div>
+      <div class="metric-source">900k confirmed Google Search · iOS ATT uplift applied</div>
     </div>
     <div class="metric-card highlight">
-      <div class="metric-value">~1.8M</div>
-      <div class="metric-label">Estimated via search (2025)</div>
-      <div class="metric-source">900k confirmed Google Search + iOS ATT uplift</div>
+      <div class="metric-value">3 of 7</div>
+      <div class="metric-label">Query types where TR ranks 1st today</div>
+      <div class="metric-source">Beginners · ETF savings plans · general broker · April 2026 audit</div>
     </div>
     <div class="metric-card">
       <div class="metric-value">3.3★</div>
-      <div class="metric-label">Trustpilot · primary AI trust signal</div>
-      <div class="metric-source">April 2026 · dragging score on 5 of 7 query types</div>
+      <div class="metric-label">Trustpilot score</div>
+      <div class="metric-source">April 2026 · primary AI trust signal across all three platforms</div>
     </div>
     <div class="metric-card">
       <div class="metric-value">3.4M</div>
-      <div class="metric-label">AI search TAM by 2027</div>
-      <div class="metric-source">17M total market · 50% search · 40% AI share</div>
+      <div class="metric-label">2027 AI search TAM — new broker accounts</div>
+      <div class="metric-source">17M total market · 50% via search · 40% AI share</div>
     </div>
   </div>
 
@@ -566,7 +566,7 @@
   <h2>4. Strategy</h2>
   <p class="section-sub">Click any action to expand</p>
 
-  <div class="callout" style="margin-bottom: 28px;">TR is currently competitive on <strong>3 of 7 query types</strong>. The gaps — customer service, fees, trust — are fixable. Closing them moves TR to first across all 7, worth an estimated <strong>~340k additional customers per year</strong> at 2027 TAM scale. Every action below directly addresses a gap identified in the diagnostic.</div>
+  <div class="callout" style="margin-bottom: 28px;">The strategy operates across four pillars. <strong>(1) Reputation</strong> — move our Trustpilot score from 3.3 → 4.0. <strong>(2) Technical visibility</strong> — migrate the Help Centre so AI crawlers can read it and add schema so our answers appear directly in AI Overviews above organic results. <strong>(3) Data accuracy</strong> — correct TR's data on comparison sites, Wikipedia and editorial sources so AI quotes current facts rather than stale ones. <strong>(4) Influence</strong> — brief Finanztip, build a Reddit presence, and create standing update processes so our AI signals improve in step with our product. Together, these actions move TR from competitive on <strong>3 of 7 query types</strong> to leading across all 7.</div>
 
   <style>
     .strat-group { margin: 28px 0 8px; }
@@ -600,17 +600,17 @@
     <div class="strat-group-label internal">Internal · Technical</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Migrate Help Centre from CSR to SSR</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Migrate Help Centre from CSR to SSR — AI bots currently read empty HTML</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>The Help Centre is currently client-side rendered (CSR) — the page HTML is empty until JavaScript executes in the browser. AI crawlers do not run JavaScript, so every Help Centre page appears blank to them regardless of its content.</p><p><strong>Action:</strong> Migrate to server-side rendering (SSR) or static site generation (SSG) so that full page content is delivered in the initial HTML response. All Help Centre content then becomes readable by AI crawlers immediately.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Add FAQPage schema markup to Help Centre</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Add FAQPage schema to feed TR answers directly into Google AI Overviews</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Confirmed: there is zero schema markup anywhere on traderepublic.com. FAQPage JSON-LD tells AI models exactly which sentence answers which question and feeds directly into Google AI Overviews above organic results.</p><p><strong>Action:</strong> Add FAQPage JSON-LD to the top 20 Help Centre pages.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Add product and organisation schema to key pages</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Add Organisation and Product schema so AI quotes TR's products and rates accurately</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Without schema, AI has to infer what TR is and what each product costs from prose. Organisation schema on the homepage establishes TR's identity. Product schema on Interest Account, ETF Savings Plan and Saveback pages gives AI exact rates, fees and conditions.</p><p><strong>Action:</strong> Add Organization schema to homepage. Add Product schema to three core product pages.</p></div>
     </details>
 
@@ -621,22 +621,22 @@
     <div class="strat-group-label internal">Internal · Non-Technical</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Respond to all 1 and 2-star Trustpilot reviews</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Respond to every unanswered 1 and 2-star Trustpilot review</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>22% of TR's 32,953 Trustpilot reviews are 1 or 2-star. The response rate % is publicly visible and indexed by AI models. Perplexity reflects response rate changes within 72 hours. This is the highest-ROI action available: zero cost, immediate AI signal improvement.</p><p><strong>Action:</strong> CX team works through all unanswered 1 and 2-star reviews. Set a target to clear the backlog within two weeks.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Launch Trustpilot review invite campaign</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Move Trustpilot score from 3.3 → 4.0</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Current score is 3.3. Finanztip rates TR customer service 1 out of 7 — the worst of all ten recommended brokers. This is the primary reason TR ranks 5th on every customer service and trust query across all three AI platforms.</p><p><strong>Action:</strong> Target happy moments — RAF reward received, 10th trade milestone, resolved support chat. Aim for 4.0. Monitor incoming star average daily; if it drops below 4.8 adjust segment targeting immediately.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Make review invites a permanent CRM trigger</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>A one-off campaign will cause the score to decay again within months. Permanent automated triggers at key satisfaction moments maintain the score without ongoing effort.</p><p><strong>Action:</strong> CRM automation — post-RAF, post-trade milestone, post-resolved support ticket. Target 500–1,000 invites per day at steady state.</p></div>
+      <summary><span class="strat-title">Build review invite feedback loops for targeted happy moments</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Inviting a user immediately after they activate interest, complete a savings plan, or receive a RAF reward means their review naturally references that feature. Reviews that mention "interest rate", "savings plan", or "easy to start" map TR to those query types in AI models — they are a discovery mechanism, not just a trust signal. A one-off campaign decays within months; permanent automated triggers sustain the signal continuously.</p><p><strong>Action:</strong> CRM automation — post-interest activation, post-RAF reward, post-10th trade, post-resolved support. Each trigger is mapped to a specific feature or use case. Target 500–1,000 invites per day at steady state.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Rewrite Help Centre page openings — AI reads the first sentence and stops</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Rewrite Help Centre page openings to lead with a direct factual answer</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>AI reads the first sentence of a page and stops. Current Help Centre pages likely open with marketing language. This returns nothing useful to AI models.</p><p><strong>Action:</strong> Rewrite the opening sentence of each top 20 Help Centre page to be a direct factual answer. Example: "Does TR charge custody fees?" → first sentence: "Trade Republic charges no custody fees."</p></div>
     </details>
 
@@ -650,22 +650,37 @@
     <div class="strat-sub-label">Trustpilot</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Subscribe to Trustpilot AFS (paid plan)</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <summary><span class="strat-title">Subscribe to Trustpilot AFS before the campaign — reviews are silently removed without it</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Without the paid AFS plan, a 50–150× spike above TR's normal review baseline triggers silent automatic review removal. Reviews stop counting and Trustpilot does not notify you. A campaign without AFS risks doing the work and getting nothing.</p><p><strong>Action:</strong> Procure AFS before the campaign goes live.</p></div>
     </details>
     <div class="callout warning" style="margin: 8px 0 4px; font-size: 0.82rem;">AFS must be live <strong>before</strong> the Internal invite campaign launches — review removal is silent and Trustpilot will not alert you.</div>
 
-    <!-- Finanztip / Stiftung Warentest -->
-    <div class="strat-sub-label">Finanztip / Stiftung Warentest</div>
+    <!-- Finanztip / Stiftung Warentest / Editorial -->
+    <div class="strat-sub-label">Finanztip / Stiftung Warentest / Editorial</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Brief Finanztip — TR is rated 1/7 for service and AI quotes it directly</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Finanztip gives TR a customer service score of 1 out of 7 — the worst of all ten brokers they recommend. This score is cited directly by AI models. TR has since invested double-digit millions in 24/7 human support with 1,000 agents, but Finanztip has not updated their score.</p><p><strong>Action:</strong> Send Finanztip a briefing document with evidence of service improvements and request a score review.</p></div>
+      <summary><span class="strat-title">Build a service improvement briefing document — evidence, not claims</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Editorial sites need verifiable data to update their scores. Telling Finanztip "we've improved" achieves nothing. A briefing document with specific, auditable evidence — agent headcount, support hours, CSAT scores, average response time, complaint resolution rate — gives editors something they can cite.</p><p><strong>Action:</strong> Compile a factual briefing document: 1,000 support agents, 24/7 coverage, current CSAT, average first-response time, vzbv complaint trend. This document is the basis for all editorial outreach.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Get ahead of Stiftung Warentest's next broker test</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>TR is currently noted in Stiftung Warentest coverage as leading in consumer complaints to the vzbv. Their broker tests are used directly as source material by AI models. Proactively supplying improvement evidence ahead of their next test influences the outcome.</p><p><strong>Action:</strong> Contact Stiftung Warentest ahead of their next scheduled broker test. Provide service improvement data and request the complaint narrative be updated.</p></div>
+      <summary><span class="strat-title">Brief Finanztip and request a formal score review — TR is currently rated 1 out of 7</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Finanztip gives TR a customer service score of 1 out of 7 — the worst of all ten brokers they recommend. This score is cited directly by AI models on every customer service query. TR has since invested double-digit millions in 24/7 human support with 1,000 agents, but Finanztip has not updated their rating.</p><p><strong>Action:</strong> Send the briefing document to Finanztip's editorial team. Request a formal review meeting. Target: score updated within their next editorial cycle.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Submit improvement evidence to Stiftung Warentest before their next broker test</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>TR is currently noted in Stiftung Warentest coverage as leading in consumer complaints to the vzbv. Their broker tests are used directly as source material by AI models. Proactively submitting evidence ahead of the test influences the outcome rather than reacting after publication.</p><p><strong>Action:</strong> Identify Stiftung Warentest's next scheduled broker test date. Submit the briefing document 4 weeks in advance. Request that the complaint narrative be reviewed before publication.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Establish a named contact list for all editorial sites covering broker and fintech</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Without standing contacts, each outreach effort resets from zero. A maintained contact list is the infrastructure that makes proactive editorial influence repeatable.</p><p><strong>Action:</strong> Map the editor or analyst responsible for broker coverage at Finanztip, Finanzfluss, Handelsblatt, and Stiftung Warentest. Record in a shared doc. Assign a TR owner to maintain these relationships.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Send editorial sites a one-page brief on every significant TR product change</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Editorial sites publish comparison articles that AI indexes directly. When TR improves a rate, adds a product, or changes fees, those articles should reflect it quickly — otherwise AI quotes outdated editorial data for months.</p><p><strong>Action:</strong> Every significant product change at TR triggers a one-page brief to the editorial contact list within one week. Build this into the same process as the comparison site data pack.</p></div>
     </details>
 
     <!-- Wikipedia -->
@@ -680,22 +695,61 @@
     <div class="strat-sub-label">Comparison Sites</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Audit data accuracy on comparison sites</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Brokervergleich.de and Finanzfluss are the first pages AI retrieves for "best broker" queries. Wrong or stale data here gets quoted at scale. Affiliate commission rates also affect how prominently TR is featured — sites earning more from competitors rank them higher.</p><p><strong>Action:</strong> Audit fee tables, feature lists and product data on the top 10 comparison sites. Send an updated data pack. Review affiliate rates on the highest-traffic sites.</p></div>
+      <summary><span class="strat-title">Audit TR's data on all major comparison sites — log every error and gap</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Brokervergleich.de and Finanzfluss rank #1–3 in Google for "best broker" queries — they are the first pages AI retrieves. Wrong or stale data — an outdated interest rate, a missing product — gets quoted by AI at scale. The audit comes first.</p><p><strong>Action:</strong> Review TR's listing on the top 10 comparison sites. For each: log incorrect fees, missing features, stale rates, and absent products. Create a master error log as the basis for the correction pack.</p></div>
     </details>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Ensure every product change reaches comparison sites within days, not months</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Product changes at TR — rate updates, new features, fee changes — need to reach comparison sites within days or AI models quote outdated information for months. Currently there is no process for this.</p><p><strong>Action:</strong> Create a data pack template. Trigger it automatically on every product change. Send to top 10 comparison sites. Assign ownership to one person in Growth.</p></div>
+      <summary><span class="strat-title">Send an updated data pack to every major comparison site</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Sites rarely update TR's data proactively — they rely on being contacted. A single standardised data pack corrects errors across all sites faster than chasing each individually.</p><p><strong>Action:</strong> Build a data pack template covering current fees, interest rates, ETF count, products, account types, and supported markets. Send to all 10 sites. Follow up within one week to confirm corrections are live.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Review TR's affiliate rates — commission drives how prominently sites feature TR</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>AI does not distinguish commercial from editorial. Sites that earn more commission from a competitor rank that competitor higher in their tables — and AI cites those tables directly. Affiliate rates are one of the most direct levers for improving AI recommendation position.</p><p><strong>Action:</strong> Obtain TR's current CPA and revenue-share rates for the top 5 comparison sites. Benchmark against Scalable Capital, XTB, and Trading212. Where TR's rate is below market, assess whether raising it is cost-effective relative to customer acquisition value.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Establish named editorial contacts at each comparison site</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Without a named contact, data corrections go to a generic inbox and stall. A direct relationship means product changes reach the right person immediately.</p><p><strong>Action:</strong> Identify the editor or partnerships manager at each of the top 10 comparison sites. Record contacts in a shared doc. These become the distribution list for all future product update packs.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Build a standing process — every product change reaches comparison sites within 48 hours</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Product changes at TR — rate updates, new features, fee changes — need to reach comparison sites within days or AI models quote outdated information for months. Currently there is no process for this.</p><p><strong>Action:</strong> Create a data pack template triggered on every product change. Assign ownership to one person in Growth. Distribute to named contacts within 48 hours of any change going live.</p></div>
     </details>
 
     <!-- Reddit r/Finanzen -->
     <div class="strat-sub-label">Reddit r/Finanzen</div>
 
     <details class="strat-item">
-      <summary><span class="strat-title">Answer TR threads on Reddit — unanswered complaints are what AI reads</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>45% of TR mentions on r/Finanzen (170k members) are negative. There is no official TR account — complaints sit unanswered and those threads are what AI models read and summarise. An unanswered complaint carries far more weight than an answered one because there is no counter-signal in the thread.</p><p>This is not about PR management. AI reads the factual content of replies. A TR response that states the correct account opening time, correct fee, or correct service channel becomes the answer AI surfaces — not the complaint above it.</p><p><strong>Action:</strong> Register a verified TR account. Identify the 20 highest-upvote TR threads. Respond factually (not promotionally) with accurate product information. Do not attempt to remove negative posts — dilute them with accurate, helpful responses.</p></div>
+      <summary><span class="strat-title">Register a verified TR account on r/Finanzen and r/Finanztip</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>There is currently no official TR presence on Reddit. A verified account establishes credibility and means responses are clearly from TR rather than appearing as anonymous rebuttals. This is required before any other Reddit action.</p><p><strong>Action:</strong> Register a TR brand account, verify via Reddit's advertiser programme, and post a brief factual intro in r/Finanzen announcing the account.</p></div>
     </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Audit all TR mentions — catalogue complaints by category and upvote count</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>45% of TR mentions on r/Finanzen (170k members) are negative. Before responding, map what the complaints are actually about — KYC delays, CS response times, fee misunderstandings, product confusion. This determines which responses have the greatest AI impact.</p><p><strong>Action:</strong> Review the top 100 TR mention threads across r/Finanzen and r/Finanztip. Log complaint category, upvote count, and whether TR has responded. Prioritise by upvote count — these are the threads AI reads most heavily.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Respond to the 20 highest-upvote TR threads with accurate product information</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>AI reads the factual content of replies. A TR response stating the correct account opening time, correct fee, or correct support channel becomes the answer AI surfaces — not the complaint above it. Do not attempt to remove negative posts. Do not respond promotionally.</p><p><strong>Action:</strong> Post a factual reply from the verified TR account on each of the top 20 threads. Use specific, correct product information. No marketing language or defensive framing.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Monitor new TR mentions weekly and respond within 48 hours</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>A one-off audit loses impact within weeks as new threads are posted. Continuous monitoring ensures the Reddit signal improves rather than decaying back to its current state.</p><p><strong>Action:</strong> Set up Reddit keyword alerts for "Trade Republic" across r/Finanzen, r/Finanztip, and r/Aktien. Assign ownership to one person. Target a 48-hour response window for all new TR threads.</p></div>
+    </details>
+
+    <details class="strat-item">
+      <summary><span class="strat-title">Seed positive content by engaging with beginner and ETF questions</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Complaint response is defensive. The stronger AI signal comes from TR being mentioned in positive, helpful contexts — beginner questions, ETF comparisons, savings plan queries. This builds new attribute associations rather than just damage limitation.</p><p><strong>Action:</strong> Identify the top recurring beginner and ETF questions in r/Finanzen. Post accurate, helpful answers that naturally reference TR's relevant features. Maintain at least one proactive post per three reactive responses.</p></div>
+    </details>
+  </div>
+
+  <div class="callout success" style="margin-top: 32px;">
+    <strong>Expected outcome:</strong> Executing across all four pillars moves TR from competitive on 3 of 7 AI query types to leading on all 7. At 2027 TAM scale, that translates to approximately <strong>748,000 AI-search-influenced customers per year</strong> — nearly double the current estimated 407,000. Trustpilot and editorial actions executed in Q2 2026 should produce measurable changes in AI framing within 60–90 days.
   </div>
 
 
