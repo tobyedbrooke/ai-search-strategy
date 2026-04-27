@@ -278,15 +278,17 @@ function renderKanban() {
     const colTasks = tasks.filter(t => t.status === col.key);
     const cards = colTasks.map(t => {
       const color = PILLAR_COLORS[t.pillar] || '#888';
-      const short = PILLAR_SHORT[t.pillar] || t.pillar;
+      const parts = t.pillar.split('·').map(s => s.trim());
+      const group = parts[0];
+      const name  = parts[1] || parts[0];
       return `
       <div class="task-card" onclick="openEditTask('${t.id}')"
            style="border-top: 5px solid ${color}; background: linear-gradient(175deg, ${color}22 0%, #22263a 38%);">
-        <div style="font-size:10px;font-weight:800;letter-spacing:0.07em;color:${color};margin-bottom:8px;opacity:0.9">${short}</div>
-        <div class="task-title">${t.title}</div>
-        <div class="task-meta">
-          <span class="tag priority-${t.priority}">${t.priority}</span>
+        <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
+          <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#2a2d40;color:#94a3b8;letter-spacing:0.06em;text-transform:uppercase">${group}</span>
+          <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${color}2a;color:${color};letter-spacing:0.06em;text-transform:uppercase">${name}</span>
         </div>
+        <div class="task-title">${t.title}</div>
         ${t.start || t.end ? `<div class="task-dates">${t.start || ''}${t.end ? ' → ' + t.end : ''}</div>` : ''}
         ${t.owner ? `<div class="task-owner">👤 ${t.owner}</div>` : ''}
       </div>`;

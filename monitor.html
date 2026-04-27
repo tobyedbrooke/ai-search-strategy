@@ -144,7 +144,10 @@
       <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Avg Incoming Rating (28d window)</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="chart-title" style="margin-bottom:0">Avg Incoming Rating (28d window)</div>
+        <button id="trend-toggle" onclick="toggleTrend()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:6px;cursor:pointer">Hide trend</button>
+      </div>
       <div class="chart-wrap"><canvas id="incomingChart"></canvas></div>
     </div>
     <div class="chart-card">
@@ -154,6 +157,10 @@
     <div class="chart-card">
       <div class="chart-title">28-Day Review Volume</div>
       <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
+    </div>
+    <div class="chart-card" style="grid-column: 1 / -1">
+      <div class="chart-title">5★ : 1★ Ratio Over Time</div>
+      <div class="chart-wrap"><canvas id="ratioChart"></canvas></div>
     </div>
   </div>
 
@@ -315,6 +322,7 @@ function saveAudits(a) { localStorage.setItem('prompt_audits', JSON.stringify(a)
 
 let tpData = loadTP();
 let audits = loadAudits();
+let showTrendLine = true;
 
 // ============================================================
 // UTILS
@@ -497,60 +505,7 @@ function renderCharts() {
     }
   });
 
-  // Incoming chart — actual data + trend projection
-  destroyChart('incomingChart');
-  const trend = getIncomingTrend();
-  // Build projection labels: extend 14 days past latest
-  const projDays = 21;
-  const extLabels = [...labels];
-  const projIncoming = incoming.map(v => null); // null for actual points in proj dataset
-  for (let i = 1; i <= projDays; i++) {
-    const d = new Date(latest.date); d.setDate(d.getDate() + i);
-    extLabels.push(d.toISOString().slice(0,10));
-    projIncoming.push(null);
-  }
-  // Trend line: starts from first actual point
-  const trendLine = extLabels.map((_, i) => {
-    if (!trend) return null;
-    const daysFromLatest = i - (labels.length - 1);
-    return Math.min(4.95, Math.max(1, trend.projAt(daysFromLatest)));
-  });
-  // Actual incoming with null fill for projection period
-  const actualIncoming = [...incoming, ...Array(projDays).fill(null)];
-  charts['incomingChart'] = new Chart(document.getElementById('incomingChart'), {
-    type: 'line',
-    data: {
-      labels: extLabels,
-      datasets: [{
-        label: 'Actual avg incoming',
-        data: actualIncoming,
-        borderColor: '#22d3ee',
-        backgroundColor: 'rgba(34,211,238,0.1)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 5,
-        pointBackgroundColor: '#22d3ee',
-      }, {
-        label: 'Trend projection',
-        data: trendLine,
-        borderColor: 'rgba(34,211,238,0.45)',
-        borderDash: [5,4],
-        pointRadius: 0,
-        fill: false,
-      }, {
-        label: '4.0 target',
-        data: extLabels.map(() => 4.0),
-        borderColor: 'rgba(34,197,94,0.4)',
-        borderDash: [6,4],
-        pointRadius: 0,
-        fill: false,
-      }]
-    },
-    options: { ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } } },
-      scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, min: 1, max: 5, ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#2e3250' } } }
-    }
-  });
+  renderIncomingChart();
 
   // Distribution chart
   destroyChart('distChart');
@@ -584,6 +539,114 @@ function renderCharts() {
     },
     options: { ...CHART_DEFAULTS }
   });
+
+  // 5★:1★ ratio over time
+  destroyChart('ratioChart');
+  const ratios = tpData.map(d => d.dist[1] > 0 ? +(d.dist[5] / d.dist[1]).toFixed(2) : null);
+  charts['ratioChart'] = new Chart(document.getElementById('ratioChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: '5★:1★ ratio',
+        data: ratios,
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,0.15)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 6,
+        pointBackgroundColor: '#a78bfa',
+      }, {
+        label: '1:1 parity',
+        data: labels.map(() => 1.0),
+        borderColor: 'rgba(245,158,11,0.45)',
+        borderDash: [6,4],
+        pointRadius: 0,
+      }, {
+        label: '4:1 good',
+        data: labels.map(() => 4.0),
+        borderColor: 'rgba(34,197,94,0.35)',
+        borderDash: [6,4],
+        pointRadius: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } } },
+      scales: {
+        x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+        y: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } }, min: 0,
+          title: { display: true, text: '5★ per 1★ received', color: '#94a3b8', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// INCOMING CHART (standalone so trend toggle can re-render it)
+// ============================================================
+let showTrendLineRef = () => showTrendLine;
+
+function toggleTrend() {
+  showTrendLine = !showTrendLine;
+  const btn = document.getElementById('trend-toggle');
+  if (btn) btn.textContent = showTrendLine ? 'Hide trend' : 'Show trend';
+  renderIncomingChart();
+}
+
+function renderIncomingChart() {
+  if (!tpData.length) return;
+  const labels = tpData.map(d => d.date);
+  const incoming = tpData.map(d => { const a = calcAvgIncoming(d); return a ? +a.toFixed(2) : null; });
+  const latest = tpData[tpData.length - 1];
+  const trend = getIncomingTrend();
+  const projDays = 21;
+  const extLabels = [...labels];
+  for (let i = 1; i <= projDays; i++) {
+    const d = new Date(latest.date); d.setDate(d.getDate() + i);
+    extLabels.push(d.toISOString().slice(0, 10));
+  }
+  const actualIncoming = [...incoming, ...Array(projDays).fill(null)];
+  const trendLineData = showTrendLine ? extLabels.map((_, i) => {
+    if (!trend) return null;
+    return Math.min(4.95, Math.max(1, trend.projAt(i - (labels.length - 1))));
+  }) : extLabels.map(() => null);
+
+  destroyChart('incomingChart');
+  charts['incomingChart'] = new Chart(document.getElementById('incomingChart'), {
+    type: 'line',
+    data: {
+      labels: extLabels,
+      datasets: [{
+        label: 'Avg incoming',
+        data: actualIncoming,
+        borderColor: '#22d3ee',
+        backgroundColor: 'rgba(34,211,238,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5,
+        pointBackgroundColor: '#22d3ee',
+      }, {
+        label: 'Trend projection',
+        data: trendLineData,
+        borderColor: 'rgba(34,211,238,0.4)',
+        borderDash: [5, 4],
+        pointRadius: 0,
+        fill: false,
+      }, {
+        label: '4.0★',
+        data: extLabels.map(() => 4.0),
+        borderColor: 'rgba(34,197,94,0.35)',
+        borderDash: [6, 4],
+        pointRadius: 0,
+        fill: false,
+      }]
+    },
+    options: { ...CHART_DEFAULTS,
+      plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } } },
+      scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, min: 1, max: 5, ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#2e3250' } } }
+    }
+  });
 }
 
 // ============================================================
@@ -601,17 +664,15 @@ function renderForecast() {
 
   // Incoming avg hits 4.0 insight
   let insightHtml = '';
-  if (trend && trend.daysTo4 !== null && trend.slope > 0) {
-    const eta4Date = addDays(latest.date, trend.daysTo4);
+  if (trend && trend.slope > 0) {
     insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.7">
-      <strong style="color:var(--green)">Incoming avg trending at +${trend.slope.toFixed(3)}★/day</strong><br>
-      Projected to reach 4.0★ around <strong>${eta4Date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong>
-      — but ${latest.totalReviews.toLocaleString()} existing reviews dilute the score slowly.
-      <strong>Volume is the lever:</strong> more reviews/day = faster score movement.
+      <strong style="color:var(--green)">Incoming review quality improving +${trend.slope.toFixed(3)}★/day.</strong>
+      The target is the <strong>Trustpilot rating reaching 4.0★</strong>. The ${latest.totalReviews.toLocaleString()} existing reviews mean the score moves slowly —
+      <strong>volume is the lever.</strong> Scenarios below show the ETA at different daily review rates, all using the current quality trend.
     </div>`;
   } else if (trend && trend.slope <= 0) {
     insightHtml = `<div style="background:#1a1212;border:1px solid var(--red);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px">
-      <strong style="color:var(--red)">Warning:</strong> Incoming avg trend is flat or declining. Add more data points to confirm.
+      <strong style="color:var(--red)">Warning:</strong> Incoming review quality trend is flat or declining. Add more data points to confirm direction.
     </div>`;
   }
 
