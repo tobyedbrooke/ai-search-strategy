@@ -321,33 +321,40 @@ async function fetchLiveTrustpilotStats() {
     );
     const { contents: html } = await res.json();
 
-    // 1. JSON-LD — most stable
-    for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+    // 1. __NEXT_DATA__ — exact unrounded counts from Next.js SSR props
+    const ndm = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    if (ndm) {
       try {
-        const obj = JSON.parse(m[1]);
-        const rating = obj.aggregateRating;
-        if (rating?.reviewCount) {
-          return {
-            count: parseInt(String(rating.reviewCount).replace(/\D/g, '')),
-            score: rating.ratingValue ? parseFloat(rating.ratingValue) : null,
-          };
+        const nd = JSON.parse(ndm[1]);
+        const bu = nd?.props?.pageProps?.businessUnit
+                || nd?.props?.pageProps?.reviews?.businessUnit;
+        if (bu?.numberOfReviews?.total) {
+          return { count: bu.numberOfReviews.total, score: bu.trustScore ?? null };
         }
+        // Deep search for numberOfReviews.total anywhere in the payload
+        const hit = JSON.stringify(nd).match(/"total"\s*:\s*(\d{4,})/);
+        if (hit) return { count: parseInt(hit[1]), score: null };
       } catch {}
     }
 
-    // 2. __NEXT_DATA__ — Next.js page props
-    const ndm = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-    if (ndm) {
-      const nd = JSON.parse(ndm[1]);
-      const bu = nd?.props?.pageProps?.businessUnit;
-      if (bu?.numberOfReviews?.total) {
-        return { count: bu.numberOfReviews.total, score: bu.trustScore ?? null };
-      }
-    }
+    // 2. Raw inline JSON — "reviewCount":33456 patterns (skip rounded thousands)
+    const rawHits = [...html.matchAll(/"reviewCount"\s*:\s*"?(\d+)"?/g)]
+      .map(m => parseInt(m[1]))
+      .filter(n => n > 1000 && n % 1000 !== 0);
+    if (rawHits.length) return { count: rawHits[0], score: null };
 
-    // 3. Regex fallback
-    const m = html.match(/([\d,]+)\s+reviews?/i);
-    if (m) return { count: parseInt(m[1].replace(/,/g, '')), score: null };
+    // 3. Visible text — "33,456 reviews" style
+    const textHit = html.match(/(\d{2,3},\d{3})\s+reviews?/i);
+    if (textHit) return { count: parseInt(textHit[1].replace(/,/g, '')), score: null };
+
+    // 4. JSON-LD last — may be rounded, better than nothing
+    for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      try {
+        const obj = JSON.parse(m[1]);
+        const rc = obj.aggregateRating?.reviewCount;
+        if (rc) return { count: parseInt(String(rc).replace(/\D/g, '')), score: null };
+      } catch {}
+    }
   } catch (e) {
     console.warn('Live Trustpilot fetch failed:', e.message);
   }
