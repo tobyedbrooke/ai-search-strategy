@@ -57,16 +57,19 @@
 
   /* FORECAST */
   .section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-top: 8px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 4px; }
-  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-  @media (max-width: 700px) { .scenario-grid { grid-template-columns: 1fr; } }
+  .scenario-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 900px) { .scenario-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px) { .scenario-grid { grid-template-columns: 1fr; } }
   .scenario-card { border-radius: var(--card-radius); padding: 18px; border: 1px solid var(--border); }
   .scenario-card.current { background: #1a1d27; border-color: var(--red); }
   .scenario-card.a { background: #1a1d27; border-color: var(--amber); }
   .scenario-card.b { background: #1a1d27; border-color: var(--green); }
+  .scenario-card.ss { background: #1a1227; border-color: #e879f9; }
   .sc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
   .scenario-card.current .sc-label { color: var(--red); }
   .scenario-card.a .sc-label { color: var(--amber); }
   .scenario-card.b .sc-label { color: var(--green); }
+  .scenario-card.ss .sc-label { color: #e879f9; }
   .sc-eta { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
   .sc-detail { font-size: 12px; color: var(--muted); line-height: 1.6; }
 
@@ -582,6 +585,21 @@ function renderCharts() {
   });
 }
 
+// Binary search: how many reviews/day are needed to hit targetScore in daysAvailable?
+function reverseEngineerRate(targetScore, daysAvailable, startScore, totalReviews, avgFn) {
+  let lo = 1, hi = 1000000;
+  for (let iter = 0; iter < 60; iter++) {
+    const mid = (lo + hi) / 2;
+    let score = startScore, total = totalReviews;
+    for (let d = 1; d <= daysAvailable; d++) {
+      score = (score * total + avgFn(d) * mid) / (total + mid);
+      total += mid;
+    }
+    if (score >= targetScore) hi = mid; else lo = mid;
+  }
+  return Math.ceil(hi);
+}
+
 // ============================================================
 // INCOMING CHART (standalone so trend toggle can re-render it)
 // ============================================================
@@ -676,13 +694,20 @@ function renderForecast() {
     </div>`;
   }
 
+  // Reverse-engineer Super Sonic: hit 4.0 by mid-May (18 days from Apr 27)
+  const SUPERSONIC_TARGET_DATE = '2026-05-15';
+  const ssdays = Math.round((new Date(SUPERSONIC_TARGET_DATE) - new Date(latest.date)) / 86400000);
+  const ssRate = ssdays > 0 ? reverseEngineerRate(4.0, ssdays, latest.score, latest.totalReviews, avgFn) : null;
+
   const scenarios = [
-    { id: 'current', label: 'Current trajectory',    rate: dailyRate, color: 'current',
+    { id: 'current', label: 'Current trajectory',       rate: dailyRate, color: 'current',
       desc: `${Math.round(dailyRate)} reviews/day · quality follows trend` },
-    { id: 'a',       label: 'Invite campaign',        rate: 100,       color: 'a',
+    { id: 'a',       label: 'Current Trajectory',        rate: 100,       color: 'a',
       desc: '100 reviews/day · quality follows trend' },
-    { id: 'b',       label: 'F&F push + CX loop',     rate: 300,       color: 'b',
+    { id: 'b',       label: 'NPS Push and CS Loop',      rate: 300,       color: 'b',
       desc: '300 reviews/day · quality follows trend' },
+    { id: 'ss',      label: 'Super Sonic',               rate: ssRate || 0, color: 'ss',
+      desc: ssRate ? `${ssRate.toLocaleString()} reviews/day needed · target 15 May 2026` : 'Not enough time' },
   ];
 
   const MAX_SIM = 2555; // 7 years
@@ -693,9 +718,15 @@ function renderForecast() {
 
   let cardsHtml = insightHtml;
   scenarioResults.forEach(sc => {
-    const etaDate = sc.eta4 ? addDays(latest.date, sc.eta4) : null;
-    const etaText = etaDate ? formatDate(etaDate) : '5+ years';
-    const daysText = sc.eta4 ? `~${sc.eta4.toLocaleString()} days away` : 'Beyond 7-year horizon';
+    let etaText, daysText;
+    if (sc.id === 'ss') {
+      etaText = ssRate ? '15 May 2026' : '—';
+      daysText = ssRate ? `${ssRate.toLocaleString()} reviews/day required` : 'Cannot compute';
+    } else {
+      const etaDate = sc.eta4 ? addDays(latest.date, sc.eta4) : null;
+      etaText = etaDate ? formatDate(etaDate) : '5+ years';
+      daysText = sc.eta4 ? `~${sc.eta4.toLocaleString()} days away` : 'Beyond 7-year horizon';
+    }
     cardsHtml += `
       <div class="scenario-card ${sc.color}">
         <div class="sc-label">${sc.label}</div>
@@ -713,7 +744,7 @@ function renderForecast() {
     const d = new Date(latest.date); d.setMonth(d.getMonth() + m);
     chartLabels.push(d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }));
   }
-  const colors = { current: '#ef4444', a: '#f59e0b', b: '#22c55e' };
+  const colors = { current: '#ef4444', a: '#f59e0b', b: '#22c55e', ss: '#e879f9' };
   const datasets = scenarioResults.map(sc => ({
     label: sc.label,
     data: sc.path.map(p => p.score),
@@ -721,7 +752,8 @@ function renderForecast() {
     backgroundColor: 'transparent',
     tension: 0.4,
     pointRadius: 0,
-    borderWidth: 2,
+    borderWidth: sc.id === 'ss' ? 2.5 : 2,
+    borderDash: sc.id === 'ss' ? [4, 3] : [],
   }));
   datasets.push({
     label: '4.0 target',
