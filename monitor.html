@@ -736,22 +736,24 @@ function renderForecast() {
   });
   document.getElementById('scenario-cards').innerHTML = cardsHtml;
 
-  // Forecast chart — every other day, 10 x-axis points (= 18 days)
+  // Forecast chart — 10 evenly spaced points from today to 28 Oct 2026
   destroyChart('forecastChart');
-  const CHART_STEP = 2;   // days between each x point
+  const CHART_END = new Date('2026-10-28');
+  const CHART_TOTAL_DAYS = Math.round((CHART_END - new Date(latest.date)) / 86400000);
   const CHART_POINTS = 10;
-  const CHART_TOTAL_DAYS = CHART_STEP * (CHART_POINTS - 1); // 18 days
+  const CHART_STEP = Math.round(CHART_TOTAL_DAYS / (CHART_POINTS - 1));
   const chartLabels = [];
   for (let i = 0; i < CHART_POINTS; i++) {
-    const dt = addDays(latest.date, i * CHART_STEP);
-    chartLabels.push(dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+    const day = i === CHART_POINTS - 1 ? CHART_TOTAL_DAYS : i * CHART_STEP;
+    chartLabels.push(addDays(latest.date, day).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
   }
   const colors = { a: '#f59e0b', b: '#22c55e', ss: '#e879f9' };
   const datasets = scenarioResults.map(sc => {
     const pts = [];
     let score = latest.score, total = latest.totalReviews;
     for (let d = 0; d <= CHART_TOTAL_DAYS; d++) {
-      if (d % CHART_STEP === 0) pts.push(+Math.min(5, score).toFixed(4));
+      const isPoint = (d % CHART_STEP === 0) || d === CHART_TOTAL_DAYS;
+      if (isPoint && pts.length < CHART_POINTS) pts.push(+Math.min(5, score).toFixed(4));
       score = (score * total + avgFn(d + 1) * sc.rate) / (total + sc.rate);
       total += sc.rate;
     }
