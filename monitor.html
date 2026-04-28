@@ -738,7 +738,7 @@ function renderForecast() {
 
   // Forecast chart — 10 evenly spaced points from today to 28 Oct 2026
   destroyChart('forecastChart');
-  const CHART_END = new Date('2026-10-28');
+  const CHART_END = new Date('2028-10-01');
   const CHART_TOTAL_DAYS = Math.round((CHART_END - new Date(latest.date)) / 86400000);
   const CHART_POINTS = 10;
   const CHART_STEP = Math.round(CHART_TOTAL_DAYS / (CHART_POINTS - 1));
