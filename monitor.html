@@ -308,6 +308,53 @@ const DEFAULT_AUDITS = [
 ];
 
 // ============================================================
+// LIVE TRUSTPILOT FETCH
+// ============================================================
+async function fetchLiveTrustpilotStats() {
+  const TP_URL = 'https://www.trustpilot.com/review/traderepublic.com';
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(
+      `https://api.allorigins.win/get?url=${encodeURIComponent(TP_URL)}`,
+      { signal: ctrl.signal }
+    );
+    const { contents: html } = await res.json();
+
+    // 1. JSON-LD — most stable
+    for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      try {
+        const obj = JSON.parse(m[1]);
+        const rating = obj.aggregateRating;
+        if (rating?.reviewCount) {
+          return {
+            count: parseInt(String(rating.reviewCount).replace(/\D/g, '')),
+            score: rating.ratingValue ? parseFloat(rating.ratingValue) : null,
+          };
+        }
+      } catch {}
+    }
+
+    // 2. __NEXT_DATA__ — Next.js page props
+    const ndm = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    if (ndm) {
+      const nd = JSON.parse(ndm[1]);
+      const bu = nd?.props?.pageProps?.businessUnit;
+      if (bu?.numberOfReviews?.total) {
+        return { count: bu.numberOfReviews.total, score: bu.trustScore ?? null };
+      }
+    }
+
+    // 3. Regex fallback
+    const m = html.match(/([\d,]+)\s+reviews?/i);
+    if (m) return { count: parseInt(m[1].replace(/,/g, '')), score: null };
+  } catch (e) {
+    console.warn('Live Trustpilot fetch failed:', e.message);
+  }
+  return null;
+}
+
+// ============================================================
 // STATE
 // ============================================================
 function loadTP() {
@@ -426,9 +473,9 @@ function renderCards() {
       <div class="card-sub">${scoreDelta !== null ? (scoreDelta >= 0 ? '+' : '') + scoreDelta + ' vs prior' : 'First entry'}</div>
     </div>
     <div class="card neutral">
-      <div class="card-label">Total Reviews</div>
-      <div class="card-value">${latest.totalReviews.toLocaleString()}</div>
-      <div class="card-sub">As of ${latest.date}</div>
+      <div class="card-label">Total Reviews <span id="live-badge" style="display:none;font-size:9px;background:rgba(34,197,94,0.2);color:#22c55e;padding:1px 7px;border-radius:10px;margin-left:5px;letter-spacing:0.05em">LIVE</span></div>
+      <div class="card-value" id="live-count">${latest.totalReviews.toLocaleString()}</div>
+      <div class="card-sub" id="live-sub">Fetching live count…</div>
     </div>
     <div class="card neutral">
       <div class="card-label">28d Volume</div>
@@ -451,6 +498,20 @@ function renderCards() {
       <div class="card-sub">${ratioDelta ? (ratioDelta >= 0 ? '+' : '') + ratioDelta + ' vs prior · target >4×' : '5★ for every 1★'}</div>
     </div>
   `;
+
+  // Kick off live fetch — updates the card when it resolves
+  fetchLiveTrustpilotStats().then(stats => {
+    const countEl = document.getElementById('live-count');
+    const subEl   = document.getElementById('live-sub');
+    const badge   = document.getElementById('live-badge');
+    if (!stats?.count) {
+      if (subEl) subEl.textContent = `As of ${latest.date}`;
+      return;
+    }
+    if (countEl) countEl.textContent = stats.count.toLocaleString();
+    if (subEl)   subEl.textContent   = 'Live · trustpilot.com';
+    if (badge)   badge.style.display = 'inline';
+  });
 }
 
 // ============================================================
