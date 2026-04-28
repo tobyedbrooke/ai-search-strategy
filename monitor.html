@@ -144,11 +144,8 @@
       <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
     </div>
     <div class="chart-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div class="chart-title" style="margin-bottom:0">Avg Incoming Rating (28d window)</div>
-        <button id="trend-toggle" onclick="toggleTrend()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:6px;cursor:pointer">Hide trend</button>
-      </div>
-      <div class="chart-wrap"><canvas id="incomingChart"></canvas></div>
+      <div class="chart-title">5★ : 1★ Ratio Over Time</div>
+      <div class="chart-wrap"><canvas id="ratioChart"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Star Distribution (latest snapshot)</div>
@@ -159,8 +156,11 @@
       <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
     </div>
     <div class="chart-card" style="grid-column: 1 / -1">
-      <div class="chart-title">5★ : 1★ Ratio Over Time</div>
-      <div class="chart-wrap"><canvas id="ratioChart"></canvas></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="chart-title" style="margin-bottom:0">Avg Incoming Rating (28d window)</div>
+        <button id="trend-toggle" onclick="toggleTrend()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:6px;cursor:pointer">Hide trend</button>
+      </div>
+      <div class="chart-wrap"><canvas id="incomingChart"></canvas></div>
     </div>
   </div>
 
