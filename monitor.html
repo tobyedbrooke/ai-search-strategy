@@ -644,7 +644,7 @@ function renderIncomingChart() {
     },
     options: { ...CHART_DEFAULTS,
       plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } } },
-      scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, min: 1, max: 5, ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: '#2e3250' } } }
+      scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, min: 1, max: 5, ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 0.5, maxTicksLimit: 10 }, grid: { color: '#2e3250' } } }
     }
   });
 }
