@@ -650,20 +650,13 @@ function renderIncomingChart() {
         borderDash: [5, 4],
         pointRadius: 0,
         fill: false,
-      }, {
-        label: '4.0★',
-        data: extLabels.map(() => 4.0),
-        borderColor: 'rgba(34,197,94,0.35)',
-        borderDash: [6, 4],
-        pointRadius: 0,
-        fill: false,
       }]
     },
     options: { ...CHART_DEFAULTS,
       plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } } },
       scales: {
         x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 }, maxTicksLimit: 10 } },
-        y: { grid: { color: '#2e3250' }, min: 1, max: 5, ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 0.5, maxTicksLimit: 10 } }
+        y: { grid: { color: '#2e3250' }, min: 2.5, max: 5.0, ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 0.5, maxTicksLimit: 10 } }
       }
     }
   });
