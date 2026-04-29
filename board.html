@@ -196,40 +196,42 @@
 // ============================================================
 // DEFAULT TASKS
 // ============================================================
+const TASKS_VERSION = 4;
+
 const DEFAULT_TASKS = [
   // Internal · Technical (3)
-  { id: 't1',  title: 'Build brand entity schema (JSON-LD) on website',         pillar: 'Internal·Technical',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
-  { id: 't2',  title: 'Submit site to Google for AI Overview indexing',          pillar: 'Internal·Technical',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-20', notes: '' },
-  { id: 't3',  title: 'Implement FAQ schema on key product pages',               pillar: 'Internal·Technical',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-15', notes: '' },
+  { id: 't1',  title: 'Migrate Help Centre from CSR to SSR',                                              pillar: 'Internal·Technical',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-06-30', notes: '' },
+  { id: 't2',  title: 'Add FAQPage schema to feed TR answers into Google AI Overviews',                    pillar: 'Internal·Technical',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't3',  title: 'Add Organisation and Product schema',                                               pillar: 'Internal·Technical',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
   // Internal · Non-Technical (6)
-  { id: 't4',  title: 'Produce "best broker Germany" comparison landing page',   pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
-  { id: 't5',  title: 'Write authoritative FAQ content for 7 target queries',   pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
-  { id: 't6',  title: 'Build Trustpilot review invite feedback loop for CX',    pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
-  { id: 't7',  title: 'Launch Friends & Family push for Trustpilot reviews',    pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
-  { id: 't8',  title: 'Refresh help-centre articles with AI-scannable format',  pillar: 'Internal·Non-Technical',      priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
-  { id: 't9',  title: 'Brief comms team on AI citation best practices',         pillar: 'Internal·Non-Technical',      priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-06-30', notes: '' },
+  { id: 't4',  title: 'Respond to every unanswered 1 and 2-star Trustpilot review',                       pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
+  { id: 't5',  title: 'Move Trustpilot score from 3.3 → 4.0',                                            pillar: 'Internal·Non-Technical',      priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-12-31', notes: '' },
+  { id: 't6',  title: 'Build review invite feedback loops for targeted happy moments',                     pillar: 'Internal·Non-Technical',      priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-07-31', notes: '' },
+  { id: 't7',  title: 'Rewrite Help Centre page openings to lead with direct factual answer',              pillar: 'Internal·Non-Technical',      priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't8',  title: 'Build review invite feedback loop for customer service',                            pillar: 'Internal·Non-Technical',      priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-07-31', notes: '' },
+  { id: 't9',  title: 'Launch friends and family push for Trustpilot reviews',                             pillar: 'Internal·Non-Technical',      priority: 'high',   status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
   // External · Trustpilot (1)
-  { id: 't10', title: 'Drive Trustpilot score from 3.3★ to 4.0★',              pillar: 'External·Trustpilot',         priority: 'urgent', status: 'in_progress', owner: '', start: '2026-05-01', end: '2026-12-31', notes: '' },
+  { id: 't10', title: 'Subscribe to Trustpilot AFS before the campaign',                                   pillar: 'External·Trustpilot',         priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
   // External · Editorial (5)
-  { id: 't11', title: 'Pitch guest posts to German fintech publications',        pillar: 'External·Editorial',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
-  { id: 't12', title: 'Secure coverage in Finanztip as top broker pick',        pillar: 'External·Editorial',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-07-31', notes: '' },
-  { id: 't13', title: 'Build relationships with 3 key finance YouTubers',       pillar: 'External·Editorial',          priority: 'high',   status: 'not_started', owner: '', start: '2026-06-01', end: '2026-08-31', notes: '' },
-  { id: 't14', title: 'Issue data-led press release on retail investing trends', pillar: 'External·Editorial',          priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-07-31', notes: '' },
-  { id: 't15', title: 'Sponsor or contribute to German fintech podcast',         pillar: 'External·Editorial',          priority: 'medium', status: 'not_started', owner: '', start: '2026-07-01', end: '2026-09-30', notes: '' },
+  { id: 't11', title: 'Build a service improvement briefing document',                                     pillar: 'External·Editorial',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't12', title: 'Brief Finanztip and request a formal score review',                                 pillar: 'External·Editorial',          priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't13', title: 'Submit improvement evidence to Stiftung Warentest',                                 pillar: 'External·Editorial',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-07-31', notes: '' },
+  { id: 't14', title: 'Establish named editorial contacts',                                                pillar: 'External·Editorial',          priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-07-31', notes: '' },
+  { id: 't15', title: 'Send editorial sites a one-page brief on every product change',                     pillar: 'External·Editorial',          priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-12-31', notes: '' },
   // External · Wikipedia (1)
-  { id: 't16', title: 'Review and expand Trade Republic Wikipedia article',      pillar: 'External·Wikipedia',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-15', notes: '' },
+  { id: 't16', title: "Fix TR's Wikipedia entry",                                                          pillar: 'External·Wikipedia',          priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-15', notes: '' },
   // External · Comparison Sites (5)
-  { id: 't17', title: 'Claim and optimise Broker Chooser profile',              pillar: 'External·Comparison Sites',   priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
-  { id: 't18', title: 'Claim and optimise Finanzfluss profile',                 pillar: 'External·Comparison Sites',   priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
-  { id: 't19', title: 'Audit and correct info on Brokervergleich.de',           pillar: 'External·Comparison Sites',   priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
-  { id: 't20', title: 'Engage with justETF.com to list TR ETF products',        pillar: 'External·Comparison Sites',   priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-07-31', notes: '' },
-  { id: 't21', title: 'Submit TR data to Robo-Advisor Protal comparison',       pillar: 'External·Comparison Sites',   priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-07-31', notes: '' },
+  { id: 't17', title: "Audit TR's data on all major comparison sites",                                     pillar: 'External·Comparison Sites',   priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't18', title: 'Send updated data pack to every major comparison site',                             pillar: 'External·Comparison Sites',   priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-15', notes: '' },
+  { id: 't19', title: "Review TR's affiliate rates",                                                       pillar: 'External·Comparison Sites',   priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't20', title: 'Establish named contacts at each comparison site',                                  pillar: 'External·Comparison Sites',   priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-07-31', notes: '' },
+  { id: 't21', title: 'Build standing process — product change reaches comparison sites within 48h',        pillar: 'External·Comparison Sites',   priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-12-31', notes: '' },
   // External · Reddit (5)
-  { id: 't22', title: 'Set up monitoring for r/Finanzen TR mentions',           pillar: 'External·Reddit',             priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
-  { id: 't23', title: 'Respond to top 10 "best broker" threads on r/Finanzen',  pillar: 'External·Reddit',             priority: 'urgent', status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
-  { id: 't24', title: 'Create helpful wiki contribution on r/Finanzen',         pillar: 'External·Reddit',             priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
-  { id: 't25', title: 'Host AMA with TR team on r/Finanzen',                   pillar: 'External·Reddit',             priority: 'medium', status: 'not_started', owner: '', start: '2026-07-01', end: '2026-08-31', notes: '' },
-  { id: 't26', title: 'Produce monthly Reddit sentiment report for team',       pillar: 'External·Reddit',             priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-12-31', notes: '' },
+  { id: 't22', title: 'Register a verified TR account on r/Finanzen and r/Finanztip',                      pillar: 'External·Reddit',             priority: 'high',   status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-15', notes: '' },
+  { id: 't23', title: 'Audit all TR mentions — catalogue complaints by category',                           pillar: 'External·Reddit',             priority: 'high',   status: 'not_started', owner: '', start: '2026-05-01', end: '2026-05-31', notes: '' },
+  { id: 't24', title: 'Respond to 20 highest-upvote TR threads with accurate product information',          pillar: 'External·Reddit',             priority: 'high',   status: 'not_started', owner: '', start: '2026-05-15', end: '2026-06-30', notes: '' },
+  { id: 't25', title: 'Monitor new TR mentions weekly and respond within 48 hours',                        pillar: 'External·Reddit',             priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-12-31', notes: '' },
+  { id: 't26', title: 'Seed positive content by engaging with beginner and ETF questions',                 pillar: 'External·Reddit',             priority: 'medium', status: 'not_started', owner: '', start: '2026-06-01', end: '2026-12-31', notes: '' },
 ];
 
 const PILLAR_COLORS = {
@@ -262,6 +264,12 @@ const STATUS_COLS = [
 // STATE
 // ============================================================
 function loadTasks() {
+  const v = parseInt(localStorage.getItem('board_tasks_version') || '0', 10);
+  if (v < TASKS_VERSION) {
+    localStorage.setItem('board_tasks_version', TASKS_VERSION);
+    localStorage.removeItem('board_tasks');
+    return JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  }
   const s = localStorage.getItem('board_tasks');
   return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_TASKS));
 }

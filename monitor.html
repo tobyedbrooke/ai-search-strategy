@@ -154,17 +154,28 @@
       <div class="chart-wrap"><canvas id="distChart"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">28-Day Review Volume</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="chart-title" style="margin-bottom:0">Review Volume</div>
+        <div style="display:flex;gap:4px">
+          <button id="vol-28d-btn" onclick="setVolumeMode('28d')" style="font-size:11px;padding:3px 10px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;cursor:pointer">28d</button>
+          <button id="vol-daily-btn" onclick="setVolumeMode('daily')" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:6px;cursor:pointer">Daily</button>
+        </div>
+      </div>
       <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
     </div>
     <div class="chart-card" style="grid-column: 1 / -1">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div class="chart-title" style="margin-bottom:0">Avg Incoming Rating (28d window)</div>
-        <button id="trend-toggle" onclick="toggleTrend()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:6px;cursor:pointer">Hide trend</button>
+        <div class="chart-title" style="margin-bottom:0">Avg Incoming Rating</div>
+        <div style="display:flex;gap:4px">
+          <button id="inc-28d-btn" onclick="setIncomingMode('28d')" style="font-size:11px;padding:3px 10px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;cursor:pointer">28d avg</button>
+          <button id="inc-daily-btn" onclick="setIncomingMode('daily')" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:6px;cursor:pointer">Daily</button>
+          <button id="trend-toggle" onclick="toggleTrend()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:6px;cursor:pointer">Hide trend</button>
+        </div>
       </div>
-      <div class="chart-wrap"><canvas id="incomingChart"></canvas></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="incomingChart"></canvas></div>
     </div>
   </div>
+  <div id="incoming-calc-panel" style="display:none;margin-top:-8px;margin-bottom:24px"></div>
 
   <div class="section-title">Forecast to 4.0 ★</div>
   <div class="scenario-grid" id="scenario-cards"></div>
@@ -173,6 +184,9 @@
     <div class="chart-title">Score Trajectory (Forecast)</div>
     <div class="chart-wrap" style="height:260px"><canvas id="forecastChart"></canvas></div>
   </div>
+
+  <div class="section-title" style="margin-bottom:12px">Bayesian Decay Analysis</div>
+  <div id="bayesian-analysis" style="margin-bottom:24px"></div>
 
   <div class="section-title" style="margin-bottom:12px">Raw Data</div>
   <div style="overflow-x:auto">
@@ -271,6 +285,9 @@
 // ============================================================
 // DATA
 // ============================================================
+const TP_DATA_VERSION = 3;
+const DAILY_VERSION = 2;
+
 const DEFAULT_TP = [
   { date: '2026-04-21', score: 3.3, totalReviews: 33000, volume28d: 287,
     dist: { 5: 123, 4: 15, 3: 3, 2: 18, 1: 128 } },
@@ -278,6 +295,44 @@ const DEFAULT_TP = [
     dist: { 5: 177, 4: 18, 3: 3, 2: 15, 1: 127 } },
   { date: '2026-04-27', score: 3.3, totalReviews: 33000, volume28d: 425,
     dist: { 5: 261, 4: 27, 3: 4, 2: 12, 1: 121 } },
+  { date: '2026-04-28', score: 3.3, totalReviews: 33458, volume28d: 458,
+    dist: { 5: 292, 4: 27, 3: 5, 2: 11, 1: 123 } },
+  { date: '2026-04-29', score: 3.3, totalReviews: 33505, volume28d: 485,
+    dist: { 5: 321, 4: 29, 3: 5, 2: 11, 1: 119 } },
+];
+
+// Daily review counts read from Trustpilot dashboard screenshot (Mar 31 – Apr 28)
+const DEFAULT_DAILY_REVIEWS = [
+  { date: '2026-03-31', count: 19 },
+  { date: '2026-04-01', count: 15 },
+  { date: '2026-04-02', count: 15 },
+  { date: '2026-04-03', count: 17 },
+  { date: '2026-04-04', count: 6  },
+  { date: '2026-04-05', count: 9  },
+  { date: '2026-04-06', count: 8  },
+  { date: '2026-04-07', count: 7  },
+  { date: '2026-04-08', count: 14 },
+  { date: '2026-04-09', count: 11 },
+  { date: '2026-04-10', count: 11 },
+  { date: '2026-04-11', count: 10 },
+  { date: '2026-04-12', count: 11 },
+  { date: '2026-04-13', count: 10 },
+  { date: '2026-04-14', count: 11 },
+  { date: '2026-04-15', count: 10 },
+  { date: '2026-04-16', count: 8  },
+  { date: '2026-04-17', count: 13 },
+  { date: '2026-04-18', count: 14 },
+  { date: '2026-04-19', count: 10 },
+  { date: '2026-04-20', count: 9  },
+  { date: '2026-04-21', count: 9  },
+  { date: '2026-04-22', count: 7  },
+  { date: '2026-04-23', count: 8  },
+  { date: '2026-04-24', count: 30 },
+  { date: '2026-04-25', count: 38 },
+  { date: '2026-04-26', count: 41 },
+  { date: '2026-04-27', count: 22 },
+  { date: '2026-04-28', count: 45 },
+  { date: '2026-04-29', count: 46 },
 ];
 
 const QUERIES = [
@@ -365,10 +420,28 @@ async function fetchLiveTrustpilotStats() {
 // STATE
 // ============================================================
 function loadTP() {
+  const v = parseInt(localStorage.getItem('tp_data_version') || '0', 10);
+  if (v < TP_DATA_VERSION) {
+    localStorage.setItem('tp_data_version', TP_DATA_VERSION);
+    localStorage.removeItem('tp_data');
+    return JSON.parse(JSON.stringify(DEFAULT_TP));
+  }
   const stored = localStorage.getItem('tp_data');
   return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_TP));
 }
 function saveTP(data) { localStorage.setItem('tp_data', JSON.stringify(data)); }
+
+function loadDailyReviews() {
+  const v = parseInt(localStorage.getItem('daily_reviews_version') || '0', 10);
+  if (v < DAILY_VERSION) {
+    localStorage.setItem('daily_reviews_version', DAILY_VERSION);
+    localStorage.removeItem('daily_reviews');
+    return JSON.parse(JSON.stringify(DEFAULT_DAILY_REVIEWS));
+  }
+  const stored = localStorage.getItem('daily_reviews');
+  return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_DAILY_REVIEWS));
+}
+function saveDailyReviews(data) { localStorage.setItem('daily_reviews', JSON.stringify(data)); }
 
 function loadAudits() {
   const stored = localStorage.getItem('prompt_audits');
@@ -377,8 +450,11 @@ function loadAudits() {
 function saveAudits(a) { localStorage.setItem('prompt_audits', JSON.stringify(a)); }
 
 let tpData = loadTP();
+let dailyReviews = loadDailyReviews();
 let audits = loadAudits();
 let showTrendLine = true;
+let volumeMode = '28d';
+let incomingMode = '28d';
 
 // ============================================================
 // UTILS
@@ -388,6 +464,115 @@ function calcAvgIncoming(dp) {
   const total = d[5] + d[4] + d[3] + d[2] + d[1];
   if (!total) return null;
   return (5*d[5] + 4*d[4] + 3*d[3] + 2*d[2] + 1*d[1]) / total;
+}
+
+// Infer each day's specific star distribution from consecutive snapshot diffs.
+// For a 1-day step: new_day_dist = (window_B - window_A) + dropped_day_dist
+// The dropped day is 28 days before window_B. We chain known daily dists as they
+// accumulate; for the first unknown dropped day we fall back to the earlier window ratio.
+function computeDailyDistributions() {
+  const sorted = [...tpData].sort((a, b) => a.date.localeCompare(b.date));
+  const knownDailyDist = {};
+
+  function estimateDist(n, ratioSrc) {
+    const total = ratioSrc[5]+ratioSrc[4]+ratioSrc[3]+ratioSrc[2]+ratioSrc[1];
+    if (!total) return {5:0,4:0,3:0,2:0,1:0};
+    return {
+      5: Math.round(n * ratioSrc[5] / total),
+      4: Math.round(n * ratioSrc[4] / total),
+      3: Math.round(n * ratioSrc[3] / total),
+      2: Math.round(n * ratioSrc[2] / total),
+      1: Math.round(n * ratioSrc[1] / total),
+    };
+  }
+
+  function distAvg(d) {
+    const t = d[5]+d[4]+d[3]+d[2]+d[1];
+    return t > 0 ? (5*d[5]+4*d[4]+3*d[3]+2*d[2]+1*d[1]) / t : null;
+  }
+
+  const results = [];
+
+  // Baseline: first snapshot's 28-day window average (no prior snapshot to diff against)
+  if (sorted.length > 0) {
+    const first = sorted[0];
+    const d = first.dist;
+    const total = d[5]+d[4]+d[3]+d[2]+d[1];
+    const avg = distAvg(d);
+    const parts = [5,4,3,2,1].filter(s=>d[s]>0).map(s=>`${s}★×${d[s]}`).join(' + ');
+    results.push({
+      date: first.date, dist: d, total, avgRating: avg ? +avg.toFixed(2) : null,
+      method: 'window_avg', days: 28,
+      calcNote: `28-day window average — formula: (${parts}) ÷ ${total}`
+    });
+  }
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const A = sorted[i], B = sorted[i + 1];
+    const daysDiff = Math.round((new Date(B.date) - new Date(A.date)) / 86400000);
+
+    if (daysDiff === 1) {
+      // Exact 1-day inference: (B.dist − A.dist) + dropped-day estimate
+      const droppedDate = new Date(B.date);
+      droppedDate.setDate(droppedDate.getDate() - 28);
+      const droppedStr = droppedDate.toISOString().slice(0, 10);
+      const droppedCount = (dailyReviews.find(d => d.date === droppedStr) || {}).count || 0;
+      const droppedDist = knownDailyDist[droppedStr] || estimateDist(droppedCount, A.dist);
+
+      const newDist = {};
+      [1,2,3,4,5].forEach(s => { newDist[s] = Math.max(0, (B.dist[s] - A.dist[s]) + droppedDist[s]); });
+      const total = newDist[5]+newDist[4]+newDist[3]+newDist[2]+newDist[1];
+      const avg = distAvg(newDist);
+      const diffParts = [5,4,3,2,1].map(s=>`${s}★: ${B.dist[s]}−${A.dist[s]}+${droppedDist[s]}=${newDist[s]}`).join(', ');
+
+      knownDailyDist[B.date] = newDist;
+      results.push({
+        date: B.date, dist: newDist, total, avgRating: avg ? +avg.toFixed(2) : null,
+        method: 'exact', days: 1,
+        calcNote: `Exact (1d window diff + dropped ${droppedStr}, ${droppedCount} reviews) — ${diffParts}`
+      });
+
+    } else {
+      // Multi-day gap: use positive star deltas as inflow signal (dropped days unknown, excluded)
+      const posDelta = {};
+      [1,2,3,4,5].forEach(s => { posDelta[s] = Math.max(0, B.dist[s] - A.dist[s]); });
+      const total = posDelta[5]+posDelta[4]+posDelta[3]+posDelta[2]+posDelta[1];
+      const avg = distAvg(posDelta);
+      const parts = [5,4,3,2,1].filter(s=>posDelta[s]>0).map(s=>`${s}★×${posDelta[s]}`).join(' + ');
+
+      results.push({
+        date: B.date, dist: posDelta, total, avgRating: avg ? +avg.toFixed(2) : null,
+        method: 'period_delta', days: daysDiff,
+        calcNote: `${daysDiff}-day period estimate — positive star deltas only (dropped days excluded): (${parts}) ÷ ${total}`
+      });
+    }
+  }
+
+  // Project one additional day using linear trend of the last two exact-inferred days
+  const exactDays = results.filter(r => r.method === 'exact');
+  if (exactDays.length >= 2) {
+    const r1 = exactDays[exactDays.length - 2];
+    const r2 = exactDays[exactDays.length - 1];
+    const slope = +(r2.avgRating - r1.avgRating).toFixed(2);
+    const raw = +(r2.avgRating + slope).toFixed(2);
+    const projected = Math.min(5.0, Math.max(1.0, raw));
+    const nextDate = new Date(r2.date); nextDate.setDate(nextDate.getDate() + 1);
+    results.push({
+      date: nextDate.toISOString().slice(0, 10), avgRating: projected,
+      method: 'projected', days: 0,
+      calcNote: `Linear projection — ${r2.avgRating} + slope (${r2.avgRating}−${r1.avgRating}) = ${raw}${raw !== projected ? ' → capped at 5.0' : ''}`
+    });
+  } else if (exactDays.length === 1) {
+    const r = exactDays[0];
+    const nextDate = new Date(r.date); nextDate.setDate(nextDate.getDate() + 1);
+    results.push({
+      date: nextDate.toISOString().slice(0, 10), avgRating: r.avgRating,
+      method: 'projected', days: 0,
+      calcNote: `Flat projection — insufficient trend data, using last known (${r.avgRating}★)`
+    });
+  }
+
+  return results;
 }
 
 function projectScore(startScore, totalReviews, nNew, avgNew) {
@@ -595,20 +780,7 @@ function renderCharts() {
     }
   });
 
-  // Volume chart
-  destroyChart('volumeChart');
-  charts['volumeChart'] = new Chart(document.getElementById('volumeChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: volumes,
-        backgroundColor: 'rgba(91,110,245,0.7)',
-        borderRadius: 4,
-      }]
-    },
-    options: { ...CHART_DEFAULTS }
-  });
+  renderVolumeChart();
 
   // 5★:1★ ratio over time
   destroyChart('ratioChart');
@@ -679,8 +851,160 @@ function toggleTrend() {
   renderIncomingChart();
 }
 
+function setVolumeMode(mode) {
+  volumeMode = mode;
+  ['28d','daily'].forEach(m => {
+    const b = document.getElementById('vol-' + m + '-btn');
+    if (!b) return;
+    if (m === mode) { b.style.background = 'var(--accent)'; b.style.borderColor = 'var(--accent)'; b.style.color = '#fff'; }
+    else             { b.style.background = 'var(--surface2)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--muted)'; }
+  });
+  renderVolumeChart();
+}
+
+function setIncomingMode(mode) {
+  incomingMode = mode;
+  ['28d','daily'].forEach(m => {
+    const b = document.getElementById('inc-' + m + '-btn');
+    if (!b) return;
+    if (m === mode) { b.style.background = 'var(--accent)'; b.style.borderColor = 'var(--accent)'; b.style.color = '#fff'; }
+    else             { b.style.background = 'var(--surface2)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--muted)'; }
+  });
+  if (mode === '28d') hideIncomingCalcPanel();
+  renderIncomingChart();
+}
+
+function renderVolumeChart() {
+  if (!tpData.length) return;
+  const isDaily = volumeMode === 'daily';
+
+  if (isDaily && dailyReviews.length) {
+    const sorted = [...dailyReviews].sort((a, b) => a.date.localeCompare(b.date));
+    const labels = sorted.map(d => d.date);
+    const data   = sorted.map(d => d.count);
+    const avg    = +(data.reduce((s, v) => s + v, 0) / data.length).toFixed(1);
+    destroyChart('volumeChart');
+    charts['volumeChart'] = new Chart(document.getElementById('volumeChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Reviews per day',
+          data,
+          backgroundColor: data.map(v => v >= avg * 1.5 ? 'rgba(34,197,94,0.75)' : 'rgba(91,110,245,0.65)'),
+          borderRadius: 3,
+        }, {
+          label: `Avg (${avg}/day)`,
+          data: labels.map(() => avg),
+          type: 'line',
+          borderColor: 'rgba(245,158,11,0.7)',
+          borderDash: [5, 4],
+          pointRadius: 0,
+          borderWidth: 1.5,
+        }]
+      },
+      options: { ...CHART_DEFAULTS,
+        plugins: {
+          legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } },
+          tooltip: { callbacks: { label: ctx => `${ctx.raw} reviews` } }
+        },
+        scales: {
+          x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 10 }, maxTicksLimit: 12 } },
+          y: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } }, min: 0 }
+        }
+      }
+    });
+  } else {
+    const labels = tpData.map(d => d.date);
+    const data   = tpData.map(d => d.volume28d);
+    destroyChart('volumeChart');
+    charts['volumeChart'] = new Chart(document.getElementById('volumeChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: '28d review total', data, backgroundColor: 'rgba(91,110,245,0.7)', borderRadius: 4 }]
+      },
+      options: { ...CHART_DEFAULTS,
+        plugins: { legend: { display: false },
+          tooltip: { callbacks: { label: ctx => `${ctx.raw} reviews in 28d` } } }
+      }
+    });
+  }
+}
+
 function renderIncomingChart() {
   if (!tpData.length) return;
+  const isDaily = incomingMode === 'daily';
+  const dailyDists = computeDailyDistributions();
+
+  if (isDaily && dailyDists.length) {
+    const METHOD_COLOR = {
+      window_avg:   'rgba(148,163,184,0.55)',
+      period_delta: 'rgba(245,158,11,0.72)',
+      exact:        'rgba(34,197,94,0.75)',
+      projected:    'rgba(139,92,246,0.65)',
+    };
+    const METHOD_BORDER = {
+      window_avg:   'rgba(148,163,184,0.8)',
+      period_delta: 'rgba(245,158,11,0.9)',
+      exact:        'rgba(34,197,94,0.9)',
+      projected:    'rgba(139,92,246,0.9)',
+    };
+    const METHOD_LABEL = {
+      window_avg:   d => `${d.date} (28d window)`,
+      period_delta: d => `${d.date} (~${d.days}d avg)`,
+      exact:        d => `${d.date} (exact)`,
+      projected:    d => `${d.date} (projected)`,
+    };
+    const labels  = dailyDists.map(d => (METHOD_LABEL[d.method] || (x=>x.date))(d));
+    const ratings = dailyDists.map(d => d.avgRating);
+    const bgColors = dailyDists.map(d => METHOD_COLOR[d.method] || 'rgba(148,163,184,0.4)');
+    const bdColors = dailyDists.map(d => METHOD_BORDER[d.method] || '#94a3b8');
+    const borderDash = dailyDists.map(d => d.method === 'projected' ? [4,3] : []);
+
+    destroyChart('incomingChart');
+    charts['incomingChart'] = new Chart(document.getElementById('incomingChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Avg ★ per day',
+          data: ratings,
+          backgroundColor: bgColors,
+          borderColor: bdColors,
+          borderWidth: 1.5,
+          borderRadius: 4,
+          yAxisID: 'y',
+          order: 2,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: ctx => ctx[0].label,
+              label: ctx => {
+                const d = dailyDists[ctx.dataIndex];
+                const mLabel = { window_avg:'28d window avg', period_delta:`${d.days}d period est.`, exact:'Exact (1d)', projected:'Projected' };
+                return [`${ctx.raw}★  —  ${mLabel[d.method] || d.method}`];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 30 } },
+          y: { grid: { color: '#2e3250' }, min: 1, max: 5,
+               ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 1 },
+               title: { display: true, text: 'Avg ★', color: '#94a3b8', font: { size: 10 } } }
+        }
+      }
+    });
+    renderIncomingCalcPanel(dailyDists);
+    return;
+  }
+
   const labels = tpData.map(d => d.date);
   const incoming = tpData.map(d => { const a = calcAvgIncoming(d); return a ? +a.toFixed(2) : null; });
   const latest = tpData[tpData.length - 1];
@@ -697,37 +1021,95 @@ function renderIncomingChart() {
     return Math.min(4.95, Math.max(1, trend.projAt(i - (labels.length - 1))));
   }) : extLabels.map(() => null);
 
+  const datasets = [{
+    label: 'Avg incoming ★',
+    data: actualIncoming,
+    borderColor: '#22d3ee',
+    backgroundColor: 'rgba(34,211,238,0.1)',
+    fill: true,
+    tension: 0.3,
+    pointRadius: 5,
+    pointBackgroundColor: '#22d3ee',
+    yAxisID: 'y',
+    type: 'line',
+  }, {
+    label: 'Trend projection',
+    data: trendLineData,
+    borderColor: 'rgba(34,211,238,0.4)',
+    borderDash: [5, 4],
+    pointRadius: 0,
+    fill: false,
+    yAxisID: 'y',
+    type: 'line',
+  }];
+
+  const scales = {
+    x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 }, maxTicksLimit: 10 } },
+    y: { grid: { color: '#2e3250' }, min: 2.5, max: 5.0, ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 0.5, maxTicksLimit: 10 } },
+  };
+
   destroyChart('incomingChart');
   charts['incomingChart'] = new Chart(document.getElementById('incomingChart'), {
     type: 'line',
-    data: {
-      labels: extLabels,
-      datasets: [{
-        label: 'Avg incoming',
-        data: actualIncoming,
-        borderColor: '#22d3ee',
-        backgroundColor: 'rgba(34,211,238,0.1)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 5,
-        pointBackgroundColor: '#22d3ee',
-      }, {
-        label: 'Trend projection',
-        data: trendLineData,
-        borderColor: 'rgba(34,211,238,0.4)',
-        borderDash: [5, 4],
-        pointRadius: 0,
-        fill: false,
-      }]
-    },
+    data: { labels: extLabels, datasets },
     options: { ...CHART_DEFAULTS,
       plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 14, padding: 10 } } },
-      scales: {
-        x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 }, maxTicksLimit: 10 } },
-        y: { grid: { color: '#2e3250' }, min: 2.5, max: 5.0, ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 0.5, maxTicksLimit: 10 } }
-      }
+      scales,
     }
   });
+}
+
+// ============================================================
+// DAILY RATING CALCULATION PANEL
+// ============================================================
+function renderIncomingCalcPanel(dailyDists) {
+  const panel = document.getElementById('incoming-calc-panel');
+  if (!panel) return;
+
+  const METHOD_BADGE = {
+    window_avg:   ['#94a3b8', '#1e293b', '28d window avg'],
+    period_delta: ['#f59e0b', '#1c1000', 'Period estimate'],
+    exact:        ['#22c55e', '#052e16', 'Exact (1d)'],
+    projected:    ['#a78bfa', '#1e1b4b', 'Projected'],
+  };
+
+  const rows = dailyDists.map(d => {
+    const [col, bg, label] = METHOD_BADGE[d.method] || ['#94a3b8','#1e293b','—'];
+    const starVal = d.avgRating != null ? `<strong style="color:${col}">${d.avgRating}★</strong>` : '—';
+    return `<tr>
+      <td style="white-space:nowrap;padding:8px 10px">${d.date}</td>
+      <td style="padding:8px 10px"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:${bg};color:${col};letter-spacing:0.06em;white-space:nowrap">${label}</span></td>
+      <td style="padding:8px 10px">${starVal}</td>
+      <td style="padding:8px 10px;font-size:11px;color:#64748b;line-height:1.5">${d.calcNote || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div style="background:#131720;border:1px solid #1e2a3a;border-top:none;border-radius:0 0 12px 12px;padding:16px 20px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:10px">Estimation methodology</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+        ${Object.entries(METHOD_BADGE).map(([,[ c,b,l]]) =>
+          `<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#94a3b8">
+            <span style="width:10px;height:10px;border-radius:2px;background:${c};opacity:0.75;flex-shrink:0"></span>${l}
+          </span>`
+        ).join('')}
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;color:#c8d4e0">
+        <thead><tr style="border-bottom:1px solid #1e2a3a">
+          <th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#475569">Date</th>
+          <th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#475569">Method</th>
+          <th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#475569">Result</th>
+          <th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#475569">Formula</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  panel.style.display = 'block';
+}
+
+function hideIncomingCalcPanel() {
+  const panel = document.getElementById('incoming-calc-panel');
+  if (panel) panel.style.display = 'none';
 }
 
 // ============================================================
@@ -757,18 +1139,13 @@ function renderForecast() {
     </div>`;
   }
 
-  // Reverse-engineer Super Sonic: hit 4.0 by mid-May (18 days from Apr 27)
-  const SUPERSONIC_TARGET_DATE = '2026-05-15';
-  const ssdays = Math.round((new Date(SUPERSONIC_TARGET_DATE) - new Date(latest.date)) / 86400000);
-  const ssRate = ssdays > 0 ? reverseEngineerRate(4.0, ssdays, latest.score, latest.totalReviews, avgFn) : null;
-
   const scenarios = [
-    { id: 'a',  label: 'Current Trajectory',   rate: 100,       color: 'a',
+    { id: 'a',  label: 'Current Trajectory',                  rate: 50,  color: 'a',
+      desc: '50 reviews/day · quality follows trend' },
+    { id: 'b',  label: 'Optimal NPS',                         rate: 100, color: 'b',
       desc: '100 reviews/day · quality follows trend' },
-    { id: 'b',  label: 'NPS Push and CS Loop', rate: 300,       color: 'b',
+    { id: 'ss', label: 'Trustpilot Premium + Optimal NPS',    rate: 300, color: 'ss',
       desc: '300 reviews/day · quality follows trend' },
-    { id: 'ss', label: 'Super Sonic',           rate: ssRate || 0, color: 'ss',
-      desc: ssRate ? `${ssRate.toLocaleString()} reviews/day needed · target 15 May 2026` : 'Not enough time' },
   ];
 
   const MAX_SIM = 2555; // 7 years
@@ -779,15 +1156,9 @@ function renderForecast() {
 
   let cardsHtml = insightHtml;
   scenarioResults.forEach(sc => {
-    let etaText, daysText;
-    if (sc.id === 'ss') {
-      etaText = ssRate ? '15 May 2026' : '—';
-      daysText = ssRate ? `${ssRate.toLocaleString()} reviews/day required` : 'Cannot compute';
-    } else {
-      const etaDate = sc.eta4 ? addDays(latest.date, sc.eta4) : null;
-      etaText = etaDate ? formatDate(etaDate) : '5+ years';
-      daysText = sc.eta4 ? `~${sc.eta4.toLocaleString()} days away` : 'Beyond 7-year horizon';
-    }
+    const etaDate = sc.eta4 ? addDays(latest.date, sc.eta4) : null;
+    const etaText = etaDate ? formatDate(etaDate) : '5+ years';
+    const daysText = sc.eta4 ? `~${sc.eta4.toLocaleString()} days away` : 'Beyond 7-year horizon';
     cardsHtml += `
       <div class="scenario-card ${sc.color}">
         <div class="sc-label">${sc.label}</div>
@@ -826,8 +1197,8 @@ function renderForecast() {
       tension: 0.3,
       pointRadius: 4,
       pointBackgroundColor: colors[sc.color],
-      borderWidth: sc.id === 'ss' ? 2.5 : 2,
-      borderDash: sc.id === 'ss' ? [4, 3] : [],
+      borderWidth: 2,
+      borderDash: [],
     };
   });
   datasets.push({
@@ -851,6 +1222,146 @@ function renderForecast() {
       }
     }
   });
+}
+
+// ============================================================
+// BAYESIAN DECAY ANALYSIS
+// ============================================================
+function computeBayesianAnalysis() {
+  if (tpData.length < 2) return null;
+
+  // For each consecutive pair, infer Trustpilot's effective review weighting.
+  // Model: displayed_score = (score_old * n_eff_old + avg_new * n_new) / (n_eff_old + n_new)
+  // n_eff_old < total_old implies Trustpilot downweights old reviews.
+  // decay_ratio = n_eff_old / total_old; if exponential: ratio = exp(-λ * Δdays)
+  const pairs = [];
+  for (let i = 0; i < tpData.length - 1; i++) {
+    const a = tpData[i], b = tpData[i + 1];
+    const n_new = b.totalReviews - a.totalReviews;
+    const delta_days = Math.round((new Date(b.date) - new Date(a.date)) / 86400000);
+    const avg_new = calcAvgIncoming(b);
+    if (!avg_new || n_new <= 0 || a.score === b.score || delta_days <= 0) {
+      pairs.push(null);
+      continue;
+    }
+    // Solve: b.score = (a.score * n_eff + avg_new * n_new) / (n_eff + n_new)
+    // n_eff = n_new * (avg_new - b.score) / (b.score - a.score)
+    const n_eff_old = n_new * (avg_new - b.score) / (b.score - a.score);
+    const decay_ratio = n_eff_old / a.totalReviews;
+    const lambda = (decay_ratio > 0 && decay_ratio < 1) ? -Math.log(decay_ratio) / delta_days : null;
+    const half_life = lambda ? +(Math.log(2) / lambda).toFixed(0) : null;
+    const pred_no_decay = (a.score * a.totalReviews + avg_new * n_new) / (a.totalReviews + n_new);
+    pairs.push({ from: a.date, to: b.date, delta_days, n_new, avg_new: +avg_new.toFixed(3),
+      pred_no_decay: +pred_no_decay.toFixed(4), actual: b.score,
+      n_eff_old: Math.round(n_eff_old), decay_ratio: +decay_ratio.toFixed(4),
+      lambda: lambda ? +lambda.toFixed(6) : null, half_life });
+  }
+
+  // Bayesian prior estimate across all data points:
+  // B = (C*m + s*n) / (C+n) → C*(B-m) = n*(s-B)
+  // With n large, B ≈ s only if Bayesian prior is small. We can solve for C+m jointly
+  // from two snapshots: subtract equations to get C = n1(s1-B1) - n2(s2-B2) / (B1-B2) -- wait
+  // Here we use the FULL simple avg approximation = the incoming window avg (limitation: only 28d window)
+  // Full formula: if simple_full_avg ≈ score (no Bayesian), the residual suggests C > 0.
+  // Better: compute implied simple full avg via back-calculation from displayed score + volume.
+  const bayesian = [];
+  for (let i = 0; i < tpData.length - 1; i++) {
+    const a = tpData[i], b = tpData[i + 1];
+    const n_new = b.totalReviews - a.totalReviews;
+    if (n_new <= 0 || a.score === b.score) continue;
+    const avg_new = calcAvgIncoming(b);
+    if (!avg_new) continue;
+    // If pure arithmetic: B2 = (B1*n1 + avg_new*n_new) / n2
+    // Difference from actual suggests Bayesian/decay at play
+    const arithmetic_pred = (a.score * a.totalReviews + avg_new * n_new) / b.totalReviews;
+    const residual = b.score - arithmetic_pred;
+    bayesian.push({ period: `${a.date}→${b.date}`, arithmetic_pred: +arithmetic_pred.toFixed(4),
+      actual_B2: b.score, residual: +residual.toFixed(4) });
+  }
+
+  return { pairs, bayesian };
+}
+
+function renderBayesianAnalysis() {
+  const el = document.getElementById('bayesian-analysis');
+  if (!el) return;
+  const analysis = computeBayesianAnalysis();
+
+  if (!analysis) {
+    el.innerHTML = `<p style="color:var(--muted);font-size:13px">Add at least 2 data points with different total review counts and scores to enable decay analysis.</p>`;
+    return;
+  }
+
+  const validPairs = analysis.pairs.filter(Boolean);
+  const validBayesian = analysis.bayesian;
+
+  // Summary callout
+  let summaryHtml = '';
+  if (validPairs.length > 0) {
+    const avgHalfLife = validPairs.filter(p => p.half_life).reduce((s, p) => s + p.half_life, 0) / validPairs.filter(p => p.half_life).length;
+    const avgDecay = validPairs.reduce((s, p) => s + p.decay_ratio, 0) / validPairs.length;
+    const avgLambda = validPairs.filter(p => p.lambda).reduce((s, p) => s + p.lambda, 0) / validPairs.filter(p => p.lambda).length;
+    summaryHtml = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Avg decay ratio / period</div>
+        <div style="font-size:22px;font-weight:700;color:#a78bfa">${avgDecay.toFixed(4)}</div>
+        <div style="font-size:11px;color:var(--muted)">effective vs total reviews</div>
+      </div>
+      ${avgHalfLife ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Implied decay half-life</div>
+        <div style="font-size:22px;font-weight:700;color:#f472b6">~${Math.round(avgHalfLife)} days</div>
+        <div style="font-size:11px;color:var(--muted)">review weight halves every N days</div>
+      </div>` : ''}
+      ${avgLambda ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Decay rate λ (per day)</div>
+        <div style="font-size:22px;font-weight:700;color:#fb923c">${avgLambda.toFixed(5)}</div>
+        <div style="font-size:11px;color:var(--muted)">e<sup>−λ×age</sup> weighting model</div>
+      </div>` : ''}
+    </div>`;
+  }
+
+  // Pairs table
+  let pairsHtml = '';
+  if (validPairs.length > 0) {
+    const rows = validPairs.map(p => `
+      <tr>
+        <td>${p.from} → ${p.to}</td>
+        <td>${p.delta_days}d</td>
+        <td>+${p.n_new.toLocaleString()}</td>
+        <td>${p.avg_new}★</td>
+        <td>${p.pred_no_decay}</td>
+        <td style="color:${Math.abs(p.actual - p.pred_no_decay) > 0.005 ? '#f472b6' : 'var(--text)'}">${p.actual}</td>
+        <td style="color:${p.decay_ratio < 0.9 ? '#f472b6' : p.decay_ratio < 0.99 ? '#f59e0b' : '#22c55e'}">${p.decay_ratio}</td>
+        <td>${p.half_life ? '~' + p.half_life + 'd' : '—'}</td>
+      </tr>`).join('');
+    pairsHtml = `
+    <div style="overflow-x:auto;margin-bottom:16px">
+    <table class="data-table">
+      <thead><tr>
+        <th>Period</th><th>Δ days</th><th>New reviews</th><th>Incoming avg</th>
+        <th>Predicted (no decay)</th><th>Actual score</th><th>Decay ratio</th><th>Half-life</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  }
+
+  const residualNote = validBayesian.length > 0
+    ? `<div style="margin-top:10px;padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6">
+        <strong style="color:var(--text)">How to read this:</strong>
+        "Decay ratio" = effective weight of old reviews ÷ their count. A ratio &lt;1 means Trustpilot
+        down-weights older reviews. "Half-life" = days for a review's weight to halve under an exponential
+        decay model (w = e<sup>−λ×age</sup>). "Predicted (no decay)" is what a simple arithmetic weighted
+        average would give — divergence from actual score reveals the decay in action.
+        More data points over a longer time window will sharpen these estimates.
+      </div>`
+    : '';
+
+  const needsData = validPairs.length === 0
+    ? `<p style="color:var(--muted);font-size:13px;padding:12px 0">Need consecutive data points with different total review counts and scores to compute decay estimates. Currently all totals or scores are identical in the default data.</p>`
+    : '';
+
+  el.innerHTML = summaryHtml + pairsHtml + needsData + residualNote;
 }
 
 // ============================================================
@@ -1020,6 +1531,7 @@ function renderAll() {
   renderCards();
   renderCharts();
   renderForecast();
+  renderBayesianAnalysis();
   renderDataTable();
   renderPromptTable();
 }

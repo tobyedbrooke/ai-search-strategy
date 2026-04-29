@@ -577,194 +577,226 @@
   <div class="callout" style="margin-bottom: 28px;">The strategy operates across four pillars. <strong>(1) Reputation</strong> — move our Trustpilot score from 3.3 → 4.0. <strong>(2) Technical visibility</strong> — migrate the Help Centre so AI crawlers can read it and add schema so our answers appear directly in AI Overviews above organic results. <strong>(3) Data accuracy</strong> — correct TR's data on comparison sites, Wikipedia and editorial sources so AI quotes current facts rather than stale ones. <strong>(4) Influence</strong> — brief Finanztip, build a Reddit presence, and create standing update processes so our AI signals improve in step with our product. Together, these actions move TR from competitive on <strong>3 of 7 query types</strong> to leading across all 7.</div>
 
   <style>
-    .strat-group { margin: 28px 0 8px; }
-    .strat-group-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding: 6px 12px; border-radius: 4px; display: inline-block; }
-    .strat-group-label.internal { background: #0d1f2d; color: #4a9eca; border: 1px solid #1a3a52; }
-    .strat-group-label.external { background: #1a1a0d; color: #c8a840; border: 1px solid #3a3510; }
+    .time-group { margin: 32px 0; }
+    .time-group-header { border-radius: 8px; padding: 16px 20px; margin-bottom: 4px; }
+    .time-group-header.short  { background: #0a1a0a; border: 1px solid #1a3a1a; }
+    .time-group-header.medium { background: #1a1200; border: 1px solid #3a2800; }
+    .time-group-header.long   { background: #0d0d1f; border: 1px solid #1e1e3a; }
+    .time-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+    .time-group-header.short  .time-label { color: #4ade80; }
+    .time-group-header.medium .time-label { color: #fbbf24; }
+    .time-group-header.long   .time-label { color: #818cf8; }
+    .time-duration { font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 10px; vertical-align: middle; }
+    .time-group-header.short  .time-duration { background: #052e0f; color: #4ade80; border: 1px solid #166534; }
+    .time-group-header.medium .time-duration { background: #1c1000; color: #fbbf24; border: 1px solid #78350f; }
+    .time-group-header.long   .time-duration { background: #0c0c1f; color: #818cf8; border: 1px solid #312e81; }
+    .time-def { font-size: 0.82rem; color: #666; margin: 6px 0 0; line-height: 1.5; }
     details.strat-item { border-bottom: 1px solid #1e1e1e; }
     details.strat-item:first-of-type { border-top: 1px solid #1e1e1e; }
     details.strat-item summary { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; cursor: pointer; list-style: none; }
     details.strat-item summary::-webkit-details-marker { display: none; }
     details.strat-item summary:hover .strat-title { color: #ffffff; }
     .strat-title { font-size: 0.92rem; font-weight: 500; color: #c8c8c8; }
-    .strat-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .strat-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 3px; }
-    .strat-badge.urgent { background: #2a0a0a; color: #e05252; border: 1px solid #4a1010; }
-    .strat-badge.high { background: #1f1400; color: #c88030; border: 1px solid #3a2800; }
-    .strat-badge.medium { background: #0d1a0d; color: #5a9a5a; border: 1px solid #1a3a1a; }
-    .strat-site { font-size: 0.68rem; font-weight: 500; background: #1a1a1a; border: 1px solid #333; border-radius: 3px; padding: 1px 6px; color: #888; }
-    .strat-sub-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 22px 0 6px; padding: 3px 8px; border-radius: 3px; display: inline-block; }
-    .strat-group.internal .strat-sub-label { color: #3a7ca8; background: #091520; border: 1px solid #122233; }
-    .strat-group.external .strat-sub-label { color: #9a7c28; background: #131200; border: 1px solid #2a2800; }
+    .strat-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .strat-pillar { font-size: 0.65rem; font-weight: 600; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+    .subgroup-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #444; padding: 18px 0 4px; }
     .strat-arrow { font-size: 0.7rem; color: #444; transition: transform 0.15s; }
     details[open] .strat-arrow { transform: rotate(90deg); }
     .strat-body { padding: 0 0 16px 0; color: #888; font-size: 0.86rem; line-height: 1.65; border-left: 2px solid #222; margin-left: 2px; padding-left: 14px; }
     .strat-body p { margin-bottom: 6px; color: #888; }
     .strat-body strong { color: #bbb; }
+    /* Section 4 view toggle */
+    .s4-view-toggle { display:flex; align-items:center; gap:12px; margin:0 0 24px; }
+    .s4-toggle-label { font-size:0.7rem; color:#555; text-transform:uppercase; letter-spacing:0.1em; }
+    .s4-toggle-pill { display:flex; background:#111; border:1px solid #222; border-radius:20px; padding:2px; }
+    .s4-toggle-btn { background:transparent; border:none; color:#666; font-size:0.78rem; padding:5px 16px; border-radius:18px; cursor:pointer; transition:all 0.15s; font-family:inherit; font-weight:500; }
+    .s4-toggle-btn.active { background:#1a1a2e; color:#818cf8; }
+    .s4-toggle-btn:hover:not(.active) { color:#aaa; }
+    /* Tag view */
+    .tag-group { margin-bottom:28px; }
+    .tag-group-header { display:flex; align-items:baseline; gap:10px; border-bottom:1px solid #1e1e1e; padding-bottom:8px; margin-bottom:4px; }
+    .tag-group-title { font-size:0.9rem; font-weight:700; color:#c8c8c8; }
+    .tag-group-sites { font-size:0.72rem; color:#555; }
+    .period-badge { font-size:0.58rem; font-weight:700; padding:2px 5px; border-radius:3px; text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
+    .period-short  { background:#052e0f; color:#4ade80; border:1px solid #166534; }
+    .period-medium { background:#1c1000; color:#fbbf24; border:1px solid #78350f; }
+    .period-long   { background:#0c0c1f; color:#818cf8; border:1px solid #312e81; }
   </style>
 
-  <!-- INTERNAL · TECHNICAL -->
-  <div class="strat-group internal">
-    <div class="strat-group-label internal">Internal · Technical</div>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Migrate Help Centre from CSR to SSR — AI bots currently read empty HTML</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>The Help Centre is currently client-side rendered (CSR) — the page HTML is empty until JavaScript executes in the browser. AI crawlers do not run JavaScript, so every Help Centre page appears blank to them regardless of its content.</p><p><strong>Action:</strong> Migrate to server-side rendering (SSR) or static site generation (SSG) so that full page content is delivered in the initial HTML response. All Help Centre content then becomes readable by AI crawlers immediately.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Add FAQPage schema to feed TR answers directly into Google AI Overviews</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Confirmed: there is zero schema markup anywhere on traderepublic.com. FAQPage JSON-LD tells AI models exactly which sentence answers which question and feeds directly into Google AI Overviews above organic results.</p><p><strong>Action:</strong> Add FAQPage JSON-LD to the top 20 Help Centre pages.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Add Organisation and Product schema so AI quotes TR's products and rates accurately</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Without schema, AI has to infer what TR is and what each product costs from prose. Organisation schema on the homepage establishes TR's identity. Product schema on Interest Account, ETF Savings Plan and Saveback pages gives AI exact rates, fees and conditions.</p><p><strong>Action:</strong> Add Organization schema to homepage. Add Product schema to three core product pages.</p></div>
-    </details>
-
+  <div class="s4-view-toggle">
+    <span class="s4-toggle-label">View by</span>
+    <div class="s4-toggle-pill">
+      <button class="s4-toggle-btn active" data-view="split" onclick="setS4View('split')">Internal / External</button>
+      <button class="s4-toggle-btn" data-view="tag" onclick="setS4View('tag')">By Channel</button>
+    </div>
   </div>
 
-  <!-- INTERNAL · NON-TECHNICAL -->
-  <div class="strat-group internal">
-    <div class="strat-group-label internal">Internal · Non-Technical</div>
+  <div id="s4-split-view">
+  <!-- SHORT TERM -->
+  <div class="time-group">
+    <div class="time-group-header short">
+      <span class="time-label">Short term</span><span class="time-duration">0 – 4 weeks</span>
+      <p class="time-def">Actions that can be started today with no build time, no external dependencies, and no budget approval beyond existing tools. Each produces a measurable AI signal change within days of completion.</p>
+    </div>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Respond to every unanswered 1 and 2-star Trustpilot review</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+    <div class="subgroup-label">Internal</div>
+
+    <details class="strat-item" data-tag="trustpilot" data-period="short">
+      <summary><span class="strat-title">Respond to every unanswered 1 and 2-star Trustpilot review</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0a10;color:#f472b6;border:1px solid #3a1020">Trustpilot</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>22% of TR's 32,953 Trustpilot reviews are 1 or 2-star. The response rate % is publicly visible and indexed by AI models. Perplexity reflects response rate changes within 72 hours. This is the highest-ROI action available: zero cost, immediate AI signal improvement.</p><p><strong>Action:</strong> CX team works through all unanswered 1 and 2-star reviews. Set a target to clear the backlog within two weeks.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Move Trustpilot score from 3.3 → 4.0</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Current score is 3.3. Finanztip rates TR customer service 1 out of 7 — the worst of all ten recommended brokers. This is the primary reason TR ranks 5th on every customer service and trust query across all three AI platforms.</p><p><strong>Action:</strong> Target happy moments — RAF reward received, 10th trade milestone, resolved support chat. Aim for 4.0. Monitor incoming star average daily; if it drops below 4.8 adjust segment targeting immediately.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Build review invite feedback loops for targeted happy moments</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Inviting a user immediately after they activate interest, complete a savings plan, or receive a RAF reward means their review naturally references that feature. Reviews that mention "interest rate", "savings plan", or "easy to start" map TR to those query types in AI models — they are a discovery mechanism, not just a trust signal. A one-off campaign decays within months; permanent automated triggers sustain the signal continuously.</p><p><strong>Action:</strong> CRM automation — post-interest activation, post-RAF reward, post-10th trade, post-resolved support. Each trigger is mapped to a specific feature or use case. Target 500–1,000 invites per day at steady state.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Rewrite Help Centre page openings to lead with a direct factual answer</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>AI reads the first sentence of a page and stops. Current Help Centre pages likely open with marketing language. This returns nothing useful to AI models.</p><p><strong>Action:</strong> Rewrite the opening sentence of each top 20 Help Centre page to be a direct factual answer. Example: "Does TR charge custody fees?" → first sentence: "Trade Republic charges no custody fees."</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Build review invite feedback loop for customer service</span><span class="strat-meta"><span class="strat-site">Trustpilot</span><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Customer service is TR's weakest AI signal — ranked 5th across all three platforms with Trustpilot as the cited source. The fastest way to change that signal is to generate reviews that specifically reference positive CS experiences. A user who has just had a support ticket resolved quickly is the highest-quality review candidate: high satisfaction, relevant experience, still in context.</p><p><strong>Action:</strong> Add a post-resolution review invite trigger in CRM — fired 30 minutes after a support ticket closes with a positive CSAT rating. Template the invite to ask specifically about the support experience. Target 200–500 invites per week from this trigger alone.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Launch friends and family push for Trustpilot reviews</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+<details class="strat-item" data-tag="trustpilot" data-period="short">
+      <summary><span class="strat-title">Launch friends and family push for Trustpilot reviews</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0a10;color:#f472b6;border:1px solid #3a1020">Trustpilot</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>TR's existing customer base is the most credible source of positive review volume. A structured Friends and Family push — targeting tenured customers who have not yet left a review — generates authentic reviews at scale and seeds use-case language across the full product range (savings plans, interest, trading, Saveback). These are the customers most likely to write reviews that reference multiple features, which broadens TR's AI attribute footprint.</p><p><strong>Action:</strong> Segment customers by tenure (12+ months, no review left), product breadth (3+ features active), and CSAT signal (no unresolved complaints). Run a targeted in-app and email invite campaign. Pair with the AFS subscription to protect volume from removal filters.</p></div>
     </details>
 
-  </div>
+    <details class="strat-item" data-tag="technical" data-period="short">
+      <summary><span class="strat-title">Add FAQPage schema to feed TR answers directly into Google AI Overviews</span><span class="strat-meta"><span class="strat-pillar" style="background:#0e0e1f;color:#818cf8;border:1px solid #1e1e3a">Technical</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Confirmed: there is zero schema markup anywhere on traderepublic.com. FAQPage JSON-LD tells AI models exactly which sentence answers which question and feeds directly into Google AI Overviews above organic results.</p><p><strong>Action:</strong> Add FAQPage JSON-LD to the top 20 Help Centre pages.</p></div>
+    </details>
 
-  <!-- EXTERNAL -->
-  <div class="strat-group external">
-    <div class="strat-group-label external">External</div>
+    <details class="strat-item" data-tag="technical" data-period="short">
+      <summary><span class="strat-title">Add Organisation and Product schema so AI quotes TR's products and rates accurately</span><span class="strat-meta"><span class="strat-pillar" style="background:#0e0e1f;color:#818cf8;border:1px solid #1e1e3a">Technical</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Without schema, AI has to infer what TR is and what each product costs from prose. Organisation schema on the homepage establishes TR's identity. Product schema on Interest Account, ETF Savings Plan and Saveback pages gives AI exact rates, fees and conditions.</p><p><strong>Action:</strong> Add Organization schema to homepage. Add Product schema to three core product pages.</p></div>
+    </details>
 
-    <!-- Trustpilot -->
-    <div class="strat-sub-label">Trustpilot</div>
+    <details class="strat-item" data-tag="technical" data-period="short">
+      <summary><span class="strat-title">Migrate Help Centre from CSR to SSR — AI bots currently read empty HTML</span><span class="strat-meta"><span class="strat-pillar" style="background:#0e0e1f;color:#818cf8;border:1px solid #1e1e3a">Technical</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>The Help Centre is currently client-side rendered (CSR) — the page HTML is empty until JavaScript executes in the browser. AI crawlers do not run JavaScript, so every Help Centre page appears blank to them regardless of its content.</p><p><strong>Action:</strong> Migrate to server-side rendering (SSR) or static site generation (SSG) so that full page content is delivered in the initial HTML response. All Help Centre content then becomes readable by AI crawlers immediately.</p></div>
+    </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Subscribe to Trustpilot AFS before the campaign — reviews are silently removed without it</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+    <div class="subgroup-label" style="margin-top:16px">External</div>
+
+    <details class="strat-item" data-tag="trustpilot" data-period="short">
+      <summary><span class="strat-title">Subscribe to Trustpilot AFS before the campaign — reviews are silently removed without it</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0a10;color:#f472b6;border:1px solid #3a1020">Trustpilot</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Without the paid AFS plan, a 50–150× spike above TR's normal review baseline triggers silent automatic review removal. Reviews stop counting and Trustpilot does not notify you. A campaign without AFS risks doing the work and getting nothing.</p><p><strong>Action:</strong> Procure AFS before the campaign goes live.</p></div>
     </details>
     <div class="callout warning" style="margin: 8px 0 4px; font-size: 0.82rem;">AFS must be live <strong>before</strong> the Internal invite campaign launches — review removal is silent and Trustpilot will not alert you.</div>
 
-    <!-- Finanztip / Stiftung Warentest / Editorial -->
-    <div class="strat-sub-label">Finanztip / Stiftung Warentest / Editorial</div>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Build a service improvement briefing document — evidence, not claims</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="editorial" data-period="short">
+      <summary><span class="strat-title">Build a service improvement briefing document — evidence, not claims</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0d00;color:#fb923c;border:1px solid #3a1e00">Editorial</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Editorial sites need verifiable data to update their scores. Telling Finanztip "we've improved" achieves nothing. A briefing document with specific, auditable evidence — agent headcount, support hours, CSAT scores, average response time, complaint resolution rate — gives editors something they can cite.</p><p><strong>Action:</strong> Compile a factual briefing document: 1,000 support agents, 24/7 coverage, current CSAT, average first-response time, vzbv complaint trend. This document is the basis for all editorial outreach.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Brief Finanztip and request a formal score review — TR is currently rated 1 out of 7</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="editorial" data-period="short">
+      <summary><span class="strat-title">Brief Finanztip and request a formal score review — TR is currently rated 1 out of 7</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0d00;color:#fb923c;border:1px solid #3a1e00">Editorial</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Finanztip gives TR a customer service score of 1 out of 7 — the worst of all ten brokers they recommend. This score is cited directly by AI models on every customer service query. TR has since invested double-digit millions in 24/7 human support with 1,000 agents, but Finanztip has not updated their rating.</p><p><strong>Action:</strong> Send the briefing document to Finanztip's editorial team. Request a formal review meeting. Target: score updated within their next editorial cycle.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Submit improvement evidence to Stiftung Warentest before their next broker test</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>TR is currently noted in Stiftung Warentest coverage as leading in consumer complaints to the vzbv. Their broker tests are used directly as source material by AI models. Proactively submitting evidence ahead of the test influences the outcome rather than reacting after publication.</p><p><strong>Action:</strong> Identify Stiftung Warentest's next scheduled broker test date. Submit the briefing document 4 weeks in advance. Request that the complaint narrative be reviewed before publication.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Establish a named contact list for all editorial sites covering broker and fintech</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Without standing contacts, each outreach effort resets from zero. A maintained contact list is the infrastructure that makes proactive editorial influence repeatable.</p><p><strong>Action:</strong> Map the editor or analyst responsible for broker coverage at Finanztip, Finanzfluss, Handelsblatt, and Stiftung Warentest. Record in a shared doc. Assign a TR owner to maintain these relationships.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Send editorial sites a one-page brief on every significant TR product change</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Editorial sites publish comparison articles that AI indexes directly. When TR improves a rate, adds a product, or changes fees, those articles should reflect it quickly — otherwise AI quotes outdated editorial data for months.</p><p><strong>Action:</strong> Every significant product change at TR triggers a one-page brief to the editorial contact list within one week. Build this into the same process as the comparison site data pack.</p></div>
-    </details>
-
-    <!-- Wikipedia -->
-    <div class="strat-sub-label">Wikipedia</div>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Fix TR's Wikipedia entry — all three AI platforms use it as factual ground truth</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>All three AI platforms use Wikipedia as a primary factual reference for company data. The current entry has conflicting customer count figures and may not reflect the December 2025 valuation.</p><p><strong>Action:</strong> Update customer count to 10M+ (September 2025), valuation to €12.5B (December 2025), confirm market list and product range. Set up a Wikipedia watchlist to catch future inaccurate edits.</p></div>
-    </details>
-
-    <!-- Comparison Sites -->
-    <div class="strat-sub-label">Comparison Sites</div>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Audit TR's data on all major comparison sites — log every error and gap</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="comparison" data-period="short">
+      <summary><span class="strat-title">Audit TR's data on all major comparison sites — log every error and gap</span><span class="strat-meta"><span class="strat-pillar" style="background:#110a1f;color:#a78bfa;border:1px solid #2a1a3a">Comparison</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Brokervergleich.de and Finanzfluss rank #1–3 in Google for "best broker" queries — they are the first pages AI retrieves. Wrong or stale data — an outdated interest rate, a missing product — gets quoted by AI at scale. The audit comes first.</p><p><strong>Action:</strong> Review TR's listing on the top 10 comparison sites. For each: log incorrect fees, missing features, stale rates, and absent products. Create a master error log as the basis for the correction pack.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Send an updated data pack to every major comparison site</span><span class="strat-meta"><span class="strat-badge urgent">Urgent</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="comparison" data-period="short">
+      <summary><span class="strat-title">Send an updated data pack to every major comparison site</span><span class="strat-meta"><span class="strat-pillar" style="background:#110a1f;color:#a78bfa;border:1px solid #2a1a3a">Comparison</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Sites rarely update TR's data proactively — they rely on being contacted. A single standardised data pack corrects errors across all sites faster than chasing each individually.</p><p><strong>Action:</strong> Build a data pack template covering current fees, interest rates, ETF count, products, account types, and supported markets. Send to all 10 sites. Follow up within one week to confirm corrections are live.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Review TR's affiliate rates — commission drives how prominently sites feature TR</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>AI does not distinguish commercial from editorial. Sites that earn more commission from a competitor rank that competitor higher in their tables — and AI cites those tables directly. Affiliate rates are one of the most direct levers for improving AI recommendation position.</p><p><strong>Action:</strong> Obtain TR's current CPA and revenue-share rates for the top 5 comparison sites. Benchmark against Scalable Capital, XTB, and Trading212. Where TR's rate is below market, assess whether raising it is cost-effective relative to customer acquisition value.</p></div>
+    <details class="strat-item" data-tag="wikipedia" data-period="short">
+      <summary><span class="strat-title">Fix TR's Wikipedia entry — all three AI platforms use it as factual ground truth</span><span class="strat-meta"><span class="strat-pillar" style="background:#091420;color:#60a5fa;border:1px solid #1a3050">Wikipedia</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>All three AI platforms use Wikipedia as a primary factual reference for company data. The current entry has conflicting customer count figures and may not reflect the December 2025 valuation.</p><p><strong>Action:</strong> Update customer count to 10M+ (September 2025), valuation to €12.5B (December 2025), confirm market list and product range. Set up a Wikipedia watchlist to catch future inaccurate edits.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Establish named editorial contacts at each comparison site</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Without a named contact, data corrections go to a generic inbox and stall. A direct relationship means product changes reach the right person immediately.</p><p><strong>Action:</strong> Identify the editor or partnerships manager at each of the top 10 comparison sites. Record contacts in a shared doc. These become the distribution list for all future product update packs.</p></div>
-    </details>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Build a standing process — every product change reaches comparison sites within 48 hours</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
-      <div class="strat-body"><p>Product changes at TR — rate updates, new features, fee changes — need to reach comparison sites within days or AI models quote outdated information for months. Currently there is no process for this.</p><p><strong>Action:</strong> Create a data pack template triggered on every product change. Assign ownership to one person in Growth. Distribute to named contacts within 48 hours of any change going live.</p></div>
-    </details>
-
-    <!-- Reddit r/Finanzen -->
-    <div class="strat-sub-label">Reddit r/Finanzen</div>
-
-    <details class="strat-item">
-      <summary><span class="strat-title">Register a verified TR account on r/Finanzen and r/Finanztip</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="reddit" data-period="short">
+      <summary><span class="strat-title">Register a verified TR account on r/Finanzen and r/Finanztip</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a1600;color:#facc15;border:1px solid #3a3000">Reddit</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>There is currently no official TR presence on Reddit. A verified account establishes credibility and means responses are clearly from TR rather than appearing as anonymous rebuttals. This is required before any other Reddit action.</p><p><strong>Action:</strong> Register a TR brand account, verify via Reddit's advertiser programme, and post a brief factual intro in r/Finanzen announcing the account.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Audit all TR mentions — catalogue complaints by category and upvote count</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="reddit" data-period="short">
+      <summary><span class="strat-title">Audit all TR mentions — catalogue complaints by category and upvote count</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a1600;color:#facc15;border:1px solid #3a3000">Reddit</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>45% of TR mentions on r/Finanzen (170k members) are negative. Before responding, map what the complaints are actually about — KYC delays, CS response times, fee misunderstandings, product confusion. This determines which responses have the greatest AI impact.</p><p><strong>Action:</strong> Review the top 100 TR mention threads across r/Finanzen and r/Finanztip. Log complaint category, upvote count, and whether TR has responded. Prioritise by upvote count — these are the threads AI reads most heavily.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Respond to the 20 highest-upvote TR threads with accurate product information</span><span class="strat-meta"><span class="strat-badge high">High</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="reddit" data-period="short">
+      <summary><span class="strat-title">Respond to the 20 highest-upvote TR threads with accurate product information</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a1600;color:#facc15;border:1px solid #3a3000">Reddit</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>AI reads the factual content of replies. A TR response stating the correct account opening time, correct fee, or correct support channel becomes the answer AI surfaces — not the complaint above it. Do not attempt to remove negative posts. Do not respond promotionally.</p><p><strong>Action:</strong> Post a factual reply from the verified TR account on each of the top 20 threads. Use specific, correct product information. No marketing language or defensive framing.</p></div>
     </details>
+  </div>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Monitor new TR mentions weekly and respond within 48 hours</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+  <!-- MEDIUM TERM -->
+  <div class="time-group">
+    <div class="time-group-header medium">
+      <span class="time-label">Medium term</span><span class="time-duration">1 – 3 months</span>
+      <p class="time-def">Actions requiring CRM build time, internal coordination, external relationship development, or budget sign-off. Each builds on the short-term actions and produces results within a quarter.</p>
+    </div>
+
+    <div class="subgroup-label">Internal</div>
+
+    <details class="strat-item" data-tag="trustpilot" data-period="medium">
+      <summary><span class="strat-title">Build review invite feedback loops for targeted happy moments</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0a10;color:#f472b6;border:1px solid #3a1020">Trustpilot</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Inviting a user immediately after they activate interest, complete a savings plan, or receive a RAF reward means their review naturally references that feature. Reviews that mention "interest rate", "savings plan", or "easy to start" map TR to those query types in AI models — they are a discovery mechanism, not just a trust signal. A one-off campaign decays within months; permanent automated triggers sustain the signal continuously.</p><p><strong>Action:</strong> CRM automation — post-interest activation, post-RAF reward, post-10th trade, post-resolved support. Each trigger is mapped to a specific feature or use case. Target 500–1,000 invites per day at steady state.</p></div>
+    </details>
+
+    <details class="strat-item" data-tag="trustpilot" data-period="medium">
+      <summary><span class="strat-title">Build review invite feedback loop for customer service</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0a10;color:#f472b6;border:1px solid #3a1020">Trustpilot</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Customer service is TR's weakest AI signal — ranked 5th across all three platforms with Trustpilot as the cited source. The fastest way to change that signal is to generate reviews that specifically reference positive CS experiences. A user who has just had a support ticket resolved quickly is the highest-quality review candidate: high satisfaction, relevant experience, still in context.</p><p><strong>Action:</strong> Add a post-resolution review invite trigger in CRM — fired 30 minutes after a support ticket closes with a positive CSAT rating. Template the invite to ask specifically about the support experience. Target 200–500 invites per week from this trigger alone.</p></div>
+    </details>
+
+    <div class="subgroup-label" style="margin-top:16px">External</div>
+
+    <details class="strat-item" data-tag="editorial" data-period="medium">
+      <summary><span class="strat-title">Submit improvement evidence to Stiftung Warentest before their next broker test</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0d00;color:#fb923c;border:1px solid #3a1e00">Editorial</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>TR is currently noted in Stiftung Warentest coverage as leading in consumer complaints to the vzbv. Their broker tests are used directly as source material by AI models. Proactively submitting evidence ahead of the test influences the outcome rather than reacting after publication.</p><p><strong>Action:</strong> Identify Stiftung Warentest's next scheduled broker test date. Submit the briefing document 4 weeks in advance. Request that the complaint narrative be reviewed before publication.</p></div>
+    </details>
+
+    <details class="strat-item" data-tag="editorial" data-period="medium">
+      <summary><span class="strat-title">Establish a named contact list for all editorial sites covering broker and fintech</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0d00;color:#fb923c;border:1px solid #3a1e00">Editorial</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Without standing contacts, each outreach effort resets from zero. A maintained contact list is the infrastructure that makes proactive editorial influence repeatable.</p><p><strong>Action:</strong> Map the editor or analyst responsible for broker coverage at Finanztip, Finanzfluss, Handelsblatt, and Stiftung Warentest. Record in a shared doc. Assign a TR owner to maintain these relationships.</p></div>
+    </details>
+
+    <details class="strat-item" data-tag="comparison" data-period="medium">
+      <summary><span class="strat-title">Review TR's affiliate rates — commission drives how prominently sites feature TR</span><span class="strat-meta"><span class="strat-pillar" style="background:#110a1f;color:#a78bfa;border:1px solid #2a1a3a">Comparison</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>AI does not distinguish commercial from editorial. Sites that earn more commission from a competitor rank that competitor higher in their tables — and AI cites those tables directly. Affiliate rates are one of the most direct levers for improving AI recommendation position.</p><p><strong>Action:</strong> Obtain TR's current CPA and revenue-share rates for the top 5 comparison sites. Benchmark against Scalable Capital, XTB, and Trading212. Where TR's rate is below market, assess whether raising it is cost-effective relative to customer acquisition value.</p></div>
+    </details>
+
+    <details class="strat-item" data-tag="comparison" data-period="medium">
+      <summary><span class="strat-title">Establish named editorial contacts at each comparison site</span><span class="strat-meta"><span class="strat-pillar" style="background:#110a1f;color:#a78bfa;border:1px solid #2a1a3a">Comparison</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Without a named contact, data corrections go to a generic inbox and stall. A direct relationship means product changes reach the right person immediately.</p><p><strong>Action:</strong> Identify the editor or partnerships manager at each of the top 10 comparison sites. Record contacts in a shared doc. These become the distribution list for all future product update packs.</p></div>
+    </details>
+  </div>
+
+  <!-- LONG TERM -->
+  <div class="time-group">
+    <div class="time-group-header long">
+      <span class="time-label">Long term</span><span class="time-duration">3 – 12 months</span>
+      <p class="time-def">Structural changes, standing processes, and outcomes that depend on short and medium-term actions completing first. These build durable AI signal rather than quick wins — the difference between a one-off improvement and a permanent competitive advantage.</p>
+    </div>
+
+    <div class="subgroup-label">Internal</div>
+
+    <details class="strat-item" data-tag="trustpilot" data-period="long">
+      <summary><span class="strat-title">Move Trustpilot score from 3.3 → 4.0</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0a10;color:#f472b6;border:1px solid #3a1020">Trustpilot</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Current score is 3.3. Finanztip rates TR customer service 1 out of 7 — the worst of all ten recommended brokers. This is the primary reason TR ranks 5th on every customer service and trust query across all three AI platforms.</p><p><strong>Action:</strong> Target happy moments — RAF reward received, 10th trade milestone, resolved support chat. Aim for 4.0. Monitor incoming star average daily; if it drops below 4.8 adjust segment targeting immediately.</p></div>
+    </details>
+
+    <div class="subgroup-label" style="margin-top:16px">External</div>
+
+    <details class="strat-item" data-tag="editorial" data-period="long">
+      <summary><span class="strat-title">Send editorial sites a one-page brief on every significant TR product change</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a0d00;color:#fb923c;border:1px solid #3a1e00">Editorial</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Editorial sites publish comparison articles that AI indexes directly. When TR improves a rate, adds a product, or changes fees, those articles should reflect it quickly — otherwise AI quotes outdated editorial data for months.</p><p><strong>Action:</strong> Every significant product change at TR triggers a one-page brief to the editorial contact list within one week. Build this into the same process as the comparison site data pack.</p></div>
+    </details>
+
+    <details class="strat-item" data-tag="comparison" data-period="long">
+      <summary><span class="strat-title">Build a standing process — every product change reaches comparison sites within 48 hours</span><span class="strat-meta"><span class="strat-pillar" style="background:#110a1f;color:#a78bfa;border:1px solid #2a1a3a">Comparison</span><span class="strat-arrow">▶</span></span></summary>
+      <div class="strat-body"><p>Product changes at TR — rate updates, new features, fee changes — need to reach comparison sites within days or AI models quote outdated information for months. Currently there is no process for this.</p><p><strong>Action:</strong> Create a data pack template triggered on every product change. Assign ownership to one person in Growth. Distribute to named contacts within 48 hours of any change going live.</p></div>
+    </details>
+
+    <details class="strat-item" data-tag="reddit" data-period="long">
+      <summary><span class="strat-title">Monitor new TR mentions weekly and respond within 48 hours</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a1600;color:#facc15;border:1px solid #3a3000">Reddit</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>A one-off audit loses impact within weeks as new threads are posted. Continuous monitoring ensures the Reddit signal improves rather than decaying back to its current state.</p><p><strong>Action:</strong> Set up Reddit keyword alerts for "Trade Republic" across r/Finanzen, r/Finanztip, and r/Aktien. Assign ownership to one person. Target a 48-hour response window for all new TR threads.</p></div>
     </details>
 
-    <details class="strat-item">
-      <summary><span class="strat-title">Seed positive content by engaging with beginner and ETF questions</span><span class="strat-meta"><span class="strat-badge medium">Medium</span><span class="strat-arrow">▶</span></span></summary>
+    <details class="strat-item" data-tag="reddit" data-period="long">
+      <summary><span class="strat-title">Seed positive content by engaging with beginner and ETF questions</span><span class="strat-meta"><span class="strat-pillar" style="background:#1a1600;color:#facc15;border:1px solid #3a3000">Reddit</span><span class="strat-arrow">▶</span></span></summary>
       <div class="strat-body"><p>Complaint response is defensive. The stronger AI signal comes from TR being mentioned in positive, helpful contexts — beginner questions, ETF comparisons, savings plan queries. This builds new attribute associations rather than just damage limitation.</p><p><strong>Action:</strong> Identify the top recurring beginner and ETF questions in r/Finanzen. Post accurate, helpful answers that naturally reference TR's relevant features. Maintain at least one proactive post per three reactive responses.</p></div>
     </details>
   </div>
+
+  </div><!-- #s4-split-view -->
+
+  <div id="s4-tag-view" style="display:none"></div>
 
   <div class="callout success" style="margin-top: 32px;">
     <strong>Expected outcome:</strong> Executing across all four pillars moves TR from competitive on 3 of 7 AI query types to leading on all 7. At 2027 TAM scale, that translates to approximately <strong>748,000 AI-search-influenced customers per year</strong> — nearly double the current estimated 407,000. Trustpilot and editorial actions executed in Q2 2026 should produce measurable changes in AI framing within 60–90 days.
@@ -1024,5 +1056,57 @@
   </div>
 
 </div>
+  <script>
+    var s4TagViewBuilt = false;
+
+    function setS4View(view) {
+      if (view === 'tag' && !s4TagViewBuilt) buildS4TagView();
+      document.getElementById('s4-split-view').style.display = view === 'split' ? '' : 'none';
+      document.getElementById('s4-tag-view').style.display   = view === 'tag'   ? '' : 'none';
+      document.querySelectorAll('.s4-toggle-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.view === view);
+      });
+    }
+
+    function buildS4TagView() {
+      var tagView = document.getElementById('s4-tag-view');
+      var TAG_CONFIG = [
+        { id: 'trustpilot', title: 'Trustpilot',        sites: null },
+        { id: 'technical',  title: 'Technical',          sites: null },
+        { id: 'editorial',  title: 'Editorial',          sites: 'Finanztip · Stiftung Warentest · Finanzfluss · Handelsblatt' },
+        { id: 'comparison', title: 'Comparison Sites',   sites: 'Brokervergleich.de · Finanzfluss · Vergleich.de · top-10 broker ranking sites' },
+        { id: 'wikipedia',  title: 'Wikipedia',          sites: null },
+        { id: 'reddit',     title: 'Reddit',             sites: 'r/Finanzen · r/Finanztip · r/Aktien' },
+      ];
+      var PERIOD_LABEL = { short: 'Short term', medium: 'Medium term', long: 'Long term' };
+      var tasksByTag = {};
+      TAG_CONFIG.forEach(function(t) { tasksByTag[t.id] = []; });
+      document.querySelectorAll('#s4-split-view .strat-item').forEach(function(task) {
+        var tag = task.dataset.tag;
+        if (tasksByTag[tag]) tasksByTag[tag].push(task);
+      });
+      TAG_CONFIG.forEach(function(cfg) {
+        var tasks = tasksByTag[cfg.id];
+        if (!tasks.length) return;
+        var group = document.createElement('div');
+        group.className = 'tag-group';
+        var hHtml = '<div class="tag-group-header"><span class="tag-group-title">' + cfg.title + '</span>';
+        if (cfg.sites) hHtml += '<span class="tag-group-sites">' + cfg.sites + '</span>';
+        hHtml += '</div>';
+        group.innerHTML = hHtml;
+        tasks.forEach(function(task) {
+          var clone = task.cloneNode(true);
+          var badge = document.createElement('span');
+          badge.className = 'period-badge period-' + task.dataset.period;
+          badge.textContent = PERIOD_LABEL[task.dataset.period];
+          var meta = clone.querySelector('.strat-meta');
+          if (meta) meta.insertBefore(badge, meta.firstChild);
+          group.appendChild(clone);
+        });
+        tagView.appendChild(group);
+      });
+      s4TagViewBuilt = true;
+    }
+  </script>
 </body>
 </html>
