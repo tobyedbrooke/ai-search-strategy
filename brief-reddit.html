@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reddit Brief — AI Search Strategy</title>
+<style>
+  :root { --bg:#0f1117; --surface:#1a1d27; --border:#2e3250; --accent:#facc15; --text:#e2e8f0; --muted:#94a3b8; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; gap:8px; height:48px; }
+  nav .brand { font-weight:700; font-size:14px; color:var(--text); text-decoration:none; margin-right:12px; }
+  nav a { color:var(--muted); text-decoration:none; padding:5px 12px; border-radius:6px; font-size:13px; }
+  nav a:hover { background:var(--surface); color:var(--text); }
+  .page { max-width:760px; margin:0 auto; padding:40px 24px; }
+  .eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:10px; }
+  h1 { font-size:26px; font-weight:800; margin-bottom:8px; }
+  .subtitle { font-size:15px; color:var(--muted); margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:24px; }
+  .context-box { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:18px 20px; margin-bottom:28px; font-size:14px; line-height:1.7; color:var(--muted); }
+  .context-box strong { color:var(--text); }
+  .stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:28px; }
+  .stat { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; }
+  .stat-val { font-size:24px; font-weight:800; color:var(--accent); }
+  .stat-label { font-size:12px; color:var(--muted); margin-top:4px; }
+  .section-head { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin:28px 0 12px; padding-top:20px; border-top:1px solid var(--border); }
+  .task { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:14px; }
+  .task-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+  .task-title { font-size:15px; font-weight:700; line-height:1.3; }
+  .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em; white-space:nowrap; flex-shrink:0; }
+  .tag-short { background:#052e0f; color:#4ade80; border:1px solid #166534; }
+  .tag-long { background:#0c0c1f; color:#818cf8; border:1px solid #312e81; }
+  .task-body { font-size:13.5px; color:var(--muted); line-height:1.7; }
+  .task-body strong { color:var(--text); }
+  .sub-list { list-style:none; padding:0; margin:10px 0; }
+  .sub-list li { display:flex; gap:10px; padding:7px 0; border-top:1px solid var(--border); font-size:13px; }
+  .sub-list li:first-child { border-top:none; }
+  .sub-list li::before { content:"→"; color:var(--accent); flex-shrink:0; }
+  .tone-box { background:#12100a; border:1px solid #2a2500; border-radius:8px; padding:16px 18px; margin:14px 0; }
+  .tone-box h4 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--accent); margin-bottom:12px; }
+  .tone-row { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  .tone-do, .tone-dont { padding:8px 12px; font-size:13px; color:var(--muted); }
+  .tone-do { border-right:1px solid #2a2500; }
+  .tone-do strong { color:#4ade80; display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase; letter-spacing:0.07em; }
+  .tone-dont strong { color:#f87171; display:block; margin-bottom:6px; font-size:11px; text-transform:uppercase; letter-spacing:0.07em; }
+  .tone-do li, .tone-dont li { list-style:none; padding:3px 0; }
+  .tone-do li::before { content:"✓ "; color:#4ade80; }
+  .tone-dont li::before { content:"✕ "; color:#f87171; }
+  .priority-table { width:100%; border-collapse:collapse; font-size:13px; margin:12px 0; }
+  .priority-table th { background:#12141c; color:var(--muted); font-weight:600; text-transform:uppercase; font-size:11px; letter-spacing:0.06em; padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  .priority-table td { padding:9px 12px; border-bottom:1px solid #1a1d27; }
+  .priority-table tr:last-child td { border-bottom:none; }
+  .outcome { background:#0f0d00; border:1px solid #3a3000; border-radius:8px; padding:16px 20px; margin-top:32px; font-size:14px; }
+  .outcome strong { color:var(--accent); display:block; margin-bottom:6px; font-size:13px; text-transform:uppercase; letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="brand">AI Search Strategy</span>
+  <a href="index.html">Strategy</a>
+  <a href="board.html">Board</a>
+  <a href="monitor.html">Monitor</a>
+</nav>
+
+<div class="page">
+  <div class="eyebrow">Community Team Brief</div>
+  <h1>Trade Republic on Reddit</h1>
+  <p class="subtitle">Reddit is the second-most cited source in AI financial answers after Wikipedia. 45% of TR mentions on r/Finanzen are negative, and almost none have a TR response. These are the threads AI reads to form its opinion of us.</p>
+
+  <div class="context-box">
+    <strong>Why Reddit matters for AI search.</strong> Perplexity cites Reddit for nearly half of all fintech query responses. When someone asks "is Trade Republic worth it?" or "Trade Republic customer service review", Perplexity synthesises answers from the highest-upvoted threads on r/Finanzen and r/Finanztip. A thread with 200 upvotes and no TR response becomes a verified fact in AI's model of who we are. An accurate, factual TR reply in that thread changes what AI says — often within 72 hours of the page being re-indexed.
+  </div>
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-val">47%</div>
+      <div class="stat-label">of Perplexity fintech citations come from Reddit</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">45%</div>
+      <div class="stat-label">of TR mentions on r/Finanzen (170k members) are negative</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">~0</div>
+      <div class="stat-label">Current TR responses to Reddit threads</div>
+    </div>
+  </div>
+
+  <div class="section-head">Target subreddits</div>
+
+  <table class="priority-table">
+    <thead><tr><th>Subreddit</th><th>Members</th><th>Why it matters</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr><td><strong>r/Finanzen</strong></td><td>170,000+</td><td>Primary German personal finance community. Highest TR mention volume. First subreddit AI retrieves for German broker queries.</td><td>Critical</td></tr>
+      <tr><td><strong>r/Finanztip</strong></td><td>~30,000</td><td>Community tied to the Finanztip editorial site. High trust. AI cites it alongside Finanztip.de content.</td><td>High</td></tr>
+      <tr><td><strong>r/Aktien</strong></td><td>~50,000</td><td>German stock investing community. TR mentions concentrated around platform comparison and trading experience.</td><td>Medium</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-head">Tasks</div>
+
+  <div class="task">
+    <div class="task-header">
+      <div class="task-title">Register a verified Trade Republic brand account</div>
+      <span class="tag tag-short">Short term — do first</span>
+    </div>
+    <div class="task-body">
+      <p>There is currently no official TR presence on Reddit. Without a verified brand account, any response appears anonymous — indistinguishable from an employee trying to manage perception, which Reddit communities react badly to.</p>
+      <p><strong>Action:</strong></p>
+      <ul class="sub-list">
+        <li>Register a Reddit account with a clearly branded name (e.g. u/TradeRepublic or u/TradeRepublic_DE)</li>
+        <li>Verify via Reddit's advertiser or brand programme to get the verified badge</li>
+        <li>Post a brief factual introduction in r/Finanzen announcing the account: who you are, why you're here, what kinds of things you'll respond to</li>
+        <li>Pin or link the intro post in your Reddit profile bio</li>
+      </ul>
+      <p><strong>No other Reddit actions should happen before this.</strong> Responding from an unverified-looking account risks a community backlash that creates more negative AI signal than the original complaints.</p>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <div class="task-title">Audit all TR mentions — catalogue by complaint type and upvote count</div>
+      <span class="tag tag-short">Short term</span>
+    </div>
+    <div class="task-body">
+      <p>Before responding, understand what the actual complaints are. AI doesn't read all posts equally — it weights by upvote count. A 300-upvote thread about KYC delays has far more AI influence than ten 10-upvote posts about a minor fee question.</p>
+      <p><strong>Action:</strong> Search Reddit for "Trade Republic" across r/Finanzen, r/Finanztip, and r/Aktien. Review the top 100 threads by upvote count. For each thread, log:</p>
+      <ul class="sub-list">
+        <li>Complaint category (KYC/onboarding, CS response time, fee confusion, account closure, product gap, technical issue)</li>
+        <li>Upvote count</li>
+        <li>Whether TR has responded (almost certainly: no)</li>
+        <li>Whether the complaint is still accurate or has since been resolved by a product change</li>
+      </ul>
+      <p><strong>Output:</strong> A prioritised list of threads to respond to, ranked by upvote count. Focus response effort on threads where the complaint is either resolved (so you can update with facts) or where an accurate explanation genuinely changes the framing.</p>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <div class="task-title">Respond to the top 20 highest-upvote negative threads</div>
+      <span class="tag tag-short">Short term</span>
+    </div>
+    <div class="task-body">
+      <p>AI synthesises the most upvoted responses in a thread. A factual, specific TR reply that gets upvoted changes the AI-visible content of that thread significantly — and Reddit threads stay indexed for years.</p>
+
+      <div class="tone-box">
+        <h4>Tone guidelines</h4>
+        <div class="tone-row">
+          <div class="tone-do">
+            <strong>Do</strong>
+            <ul>
+              <li>Lead with acknowledgement, not defence</li>
+              <li>Give specific facts ("We now have 1,000 agents, 24/7")</li>
+              <li>Admit when the complaint was valid in the past</li>
+              <li>Invite them to DM if the issue is unresolved</li>
+              <li>Stay short — 3–5 sentences maximum</li>
+              <li>Be a named person if possible ("This is [name] from TR's support team")</li>
+            </ul>
+          </div>
+          <div class="tone-dont">
+            <strong>Don't</strong>
+            <ul>
+              <li>Dispute the user's experience</li>
+              <li>Use marketing language or brand voice</li>
+              <li>Copy-paste the same reply across threads</li>
+              <li>Ask users to contact support without solving anything</li>
+              <li>Delete or report critical posts</li>
+              <li>Respond defensively to downvotes</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <p><strong>Example response (customer service complaint thread):</strong></p>
+      <div style="background:#111420;border:1px solid #2e3250;border-radius:6px;padding:14px 16px;margin:10px 0;font-size:13px;color:#94a3b8;font-style:italic">
+        "Fair criticism — TR's in-app support was understaffed through most of 2024 and we know response times were poor. Since then: 1,000 support agents across all markets, 24/7 coverage, average first response now under [X hours]. If your issue is still open, DM me directly and I'll make sure it gets to the right person." — [Name], Trade Republic
+      </div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <div class="task-title">Set up ongoing monitoring — 48-hour response window for all new TR threads</div>
+      <span class="tag tag-long">Long term — standing process</span>
+    </div>
+    <div class="task-body">
+      <p>A one-off response effort loses impact within weeks as new threads accumulate. The AI signal decays back to its current state unless there's a standing process for new mentions.</p>
+      <p><strong>Action:</strong></p>
+      <ul class="sub-list">
+        <li>Set up Reddit keyword alerts for "Trade Republic" across the three target subreddits (use Reddit's native notification system or a tool like F5Bot)</li>
+        <li>Assign one owner in Community to review alerts daily</li>
+        <li>Target a 48-hour response window for any new thread with 20+ upvotes</li>
+        <li>Monthly: log new high-upvote threads added to the tracker, flag recurring complaint themes to the relevant product team</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="outcome">
+    <strong>Expected outcome</strong>
+    Within 3 months of consistent engagement: the ratio of unanswered negative TR threads drops significantly. High-upvote threads have TR responses that provide accurate, factual context. Perplexity's synthesis of TR on customer service queries shifts from uncontested negative threads to a balanced view that includes TR's own corrections. This is one of the fastest-moving levers available — Reddit re-indexes within days of a new comment being posted.
+  </div>
+</div>
+</body>
+</html>
