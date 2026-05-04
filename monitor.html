@@ -285,8 +285,8 @@
 // ============================================================
 // DATA
 // ============================================================
-const TP_DATA_VERSION = 3;
-const DAILY_VERSION = 2;
+const TP_DATA_VERSION = 4;
+const DAILY_VERSION = 3;
 
 const DEFAULT_TP = [
   { date: '2026-04-21', score: 3.3, totalReviews: 33000, volume28d: 287,
@@ -299,6 +299,8 @@ const DEFAULT_TP = [
     dist: { 5: 292, 4: 27, 3: 5, 2: 11, 1: 123 } },
   { date: '2026-04-29', score: 3.3, totalReviews: 33505, volume28d: 485,
     dist: { 5: 321, 4: 29, 3: 5, 2: 11, 1: 119 } },
+  { date: '2026-05-04', score: 3.4, totalReviews: 33505, volume28d: 623,
+    dist: { 5: 455, 4: 48, 3: 6, 2: 12, 1: 102 } },
 ];
 
 // Daily review counts read from Trustpilot dashboard screenshot (Mar 31 – Apr 28)
@@ -333,6 +335,9 @@ const DEFAULT_DAILY_REVIEWS = [
   { date: '2026-04-27', count: 22 },
   { date: '2026-04-28', count: 45 },
   { date: '2026-04-29', count: 46 },
+  { date: '2026-04-30', count: 40 },
+  { date: '2026-05-01', count: 34 },
+  { date: '2026-05-02', count: 51 },
 ];
 
 const QUERIES = [
