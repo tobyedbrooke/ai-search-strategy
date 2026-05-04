@@ -177,6 +177,13 @@
   </div>
   <div id="incoming-calc-panel" style="display:none;margin-top:-8px;margin-bottom:24px"></div>
 
+  <div id="source-split-row" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">Review Source Split (latest snapshot)</div>
+      <div class="chart-wrap"><canvas id="sourceSplitChart"></canvas></div>
+    </div>
+  </div>
+
   <div class="section-title">Forecast to 4.0 ★</div>
   <div class="scenario-grid" id="scenario-cards"></div>
 
@@ -300,7 +307,8 @@ const DEFAULT_TP = [
   { date: '2026-04-29', score: 3.3, totalReviews: 33505, volume28d: 485,
     dist: { 5: 321, 4: 29, 3: 5, 2: 11, 1: 119 } },
   { date: '2026-05-04', score: 3.4, totalReviews: 33505, volume28d: 623,
-    dist: { 5: 455, 4: 48, 3: 6, 2: 12, 1: 102 } },
+    dist: { 5: 455, 4: 48, 3: 6, 2: 12, 1: 102 },
+    source_split: { invitation: 444, organic: 179 } },
 ];
 
 // Daily review counts read from Trustpilot dashboard screenshot (Mar 31 – Apr 28)
@@ -786,6 +794,7 @@ function renderCharts() {
   });
 
   renderVolumeChart();
+  renderSourceSplitChart();
 
   // 5★:1★ ratio over time
   destroyChart('ratioChart');
@@ -824,6 +833,43 @@ function renderCharts() {
         x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
         y: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } }, min: 0,
           title: { display: true, text: '5★ per 1★ received', color: '#94a3b8', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderSourceSplitChart() {
+  const latest = tpData[tpData.length - 1];
+  const row = document.getElementById('source-split-row');
+  if (!latest || !latest.source_split) { row.style.display = 'none'; return; }
+  row.style.display = '';
+  const { invitation, organic } = latest.source_split;
+  const total = invitation + organic;
+  destroyChart('sourceSplitChart');
+  charts['sourceSplitChart'] = new Chart(document.getElementById('sourceSplitChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Basic Invitation', 'Organic'],
+      datasets: [{
+        data: [invitation, organic],
+        backgroundColor: ['#5b6ef5', '#22d3ee'],
+        borderWidth: 2,
+        borderColor: '#1a1d27',
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: '#94a3b8', font: { size: 12 }, padding: 16, boxWidth: 14 } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const pct = Math.round(ctx.parsed / total * 100);
+              return ' ' + ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+            }
+          }
+        }
       }
     }
   });
