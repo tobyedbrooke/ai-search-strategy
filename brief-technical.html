@@ -16,8 +16,11 @@
   .eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:10px; }
   h1 { font-size:26px; font-weight:800; margin-bottom:8px; }
   .subtitle { font-size:15px; color:var(--muted); margin-bottom:32px; border-bottom:1px solid var(--border); padding-bottom:24px; }
-  .context-box { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:18px 20px; margin-bottom:32px; font-size:14px; line-height:1.7; color:var(--muted); }
+  .context-box { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:18px 20px; margin-bottom:28px; font-size:14px; line-height:1.7; color:var(--muted); }
   .context-box strong { color:var(--text); }
+  .finding { background:#0f0a1a; border:1px solid #3b2e6e; border-left:3px solid #818cf8; border-radius:8px; padding:16px 20px; margin-bottom:20px; font-size:13.5px; line-height:1.7; }
+  .finding-head { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#818cf8; margin-bottom:8px; }
+  .finding strong { color:var(--text); }
   .task { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:22px; margin-bottom:20px; }
   .task-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
   .task-num { width:28px; height:28px; border-radius:50%; background:#1a1d37; border:1px solid var(--accent); color:var(--accent); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -34,6 +37,7 @@
   .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.05em; }
   .tag-short { background:#052e0f; color:#4ade80; border:1px solid #166534; }
   .tag-medium { background:#1c1000; color:#fbbf24; border:1px solid #78350f; }
+  .section-head { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin:32px 0 14px; padding-top:24px; border-top:1px solid var(--border); }
   .outcome { background:#051a0f; border:1px solid #166534; border-radius:8px; padding:16px 20px; margin-top:32px; font-size:14px; }
   .outcome strong { color:#4ade80; display:block; margin-bottom:6px; font-size:13px; text-transform:uppercase; letter-spacing:0.06em; }
 </style>
@@ -49,85 +53,86 @@
 <div class="page">
   <div class="eyebrow">Technical Team Brief</div>
   <h1>Make Trade Republic readable by AI</h1>
-  <p class="subtitle">Three technical changes that determine whether AI systems can read and cite our content. All are short-term. None require new content — only how we serve what already exists.</p>
+  <p class="subtitle">Three technical changes that determine whether AI systems can read and cite our content. Based on confirmed audit findings from the TR support page and main site.</p>
 
   <div class="context-box">
-    <strong>Why this matters.</strong> AI systems like ChatGPT, Perplexity and Google AI Overviews fetch pages the same way a simple HTTP client does — they do not execute JavaScript. If a page's content is injected by JS after load, the AI sees an empty shell. Trade Republic's Help Centre is currently in this state. Additionally, without structured data markup (schema), AI has to guess what TR is, what products cost, and which text answers which question. These three changes fix both problems.
+    <strong>Why this matters.</strong> AI systems like ChatGPT, Perplexity and Google AI Overviews fetch pages the same way a simple HTTP client does — they do not execute JavaScript. If a page's content is fetched by JS after load, the AI sees an empty shell. We have confirmed this is exactly what is happening with TR's support page. Additionally, without structured data markup (schema), AI has to guess what TR is, what products cost, and which text answers which question. These three changes fix both problems.
   </div>
+
+  <div class="section-head">Confirmed audit findings</div>
+
+  <div class="finding">
+    <div class="finding-head">Finding 1 — Main site is fine; the accordion HCAs are the problem</div>
+    <p>The main TR website is already served correctly — AI crawlers can read the homepage and product pages. The problem is specific to the <strong>Help Centre accordion articles (HCAs)</strong>: their content is fetched from the Strapi CMS via a separate API call after the page loads, so AI sees the accordion headings but none of the answers inside them.</p>
+    <p style="margin-top:10px">This means: when someone asks Perplexity "how do TR fees work?" or "what is TR's interest rate?", the AI cannot cite TR's own support page — even though TR has accurate, well-written answers published there. The answers are invisible to every crawler.</p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">Finding 2 — FAQPage schema exists but loads at the same time as the content</div>
+    <p>TR already has FAQPage schema markup on the support page. The problem is that it is <strong>injected client-side alongside the HCA content</strong>, so it loads after the crawler has already left. Fixing the HCA rendering (Task 1) makes the existing schema readable automatically — no schema work is required separately.</p>
+  </div>
+
+  <div class="finding">
+    <div class="finding-head">Finding 3 — Some HCAs may only exist in-app, not on the web</div>
+    <p>Any Help Centre article that exists only inside the TR app cannot be indexed or cited by AI. An audit is needed to identify which articles are web-visible and which are app-only, and to publish missing articles to the support page.</p>
+  </div>
+
+  <div class="section-head">Tasks</div>
 
   <div class="task">
     <div class="task-header">
       <div class="task-num">1</div>
-      <div class="task-title">Audit CSR vs SSR across Help Centre and main site <span class="tag tag-short" style="margin-left:8px">Short term</span></div>
+      <div class="task-title">Make the Help Centre accordion articles server-side rendered <span class="tag tag-short" style="margin-left:8px">Short term — highest priority</span></div>
     </div>
     <div class="task-body">
-      <p>Before migrating anything, confirm which pages are actually client-side rendered (invisible to AI) and which are server-side rendered (readable). This is a 30-minute audit.</p>
-      <p><strong>How to check:</strong></p>
-      <ul class="steps">
-        <li><span class="step-n">1.</span><span>In Chrome, go to <code>support.traderepublic.com</code> and any Help Centre article. Press <strong>⌘+U</strong> (View Source). If the body contains your article text, it's SSR. If you see mostly empty <code>&lt;div&gt;</code> tags and script imports, it's CSR.</span></li>
-        <li><span class="step-n">2.</span><span>Confirm with curl — this is exactly what AI crawlers see:</span></li>
-      </ul>
-      <div class="code">curl -s https://support.traderepublic.com/en-de/articles/your-article-slug | grep -c "Trade Republic"</div>
-      <p>If the count is 0 or very low, AI crawlers see nothing. If it returns meaningful paragraph text, it's crawlable.</p>
-      <p><strong>Also check the main site</strong> — traderepublic.com/en-de product pages (Interest Account, ETF Savings Plan). The homepage stats and feature descriptions may be JS-rendered even if they appear visually. View Source and check.</p>
-      <p><strong>Output:</strong> A list of pages confirmed as CSR (need migration) vs SSR (already crawlable). This scopes the migration work precisely.</p>
+      <p>The main TR site is already SSR — this change is scoped only to the HCA content inside the support page accordions. Currently their content is fetched from the Strapi CMS API client-side after page load. The fix moves this fetch to run server-side, so the answers are embedded in the initial HTML that crawlers receive.</p>
+      <p><strong>The change:</strong> Replace the client-side fetch with <code>useAsyncData</code> or <code>useFetch</code> called at the top level of the component setup (not inside <code>onMounted</code>). Nuxt will run this on the server and inline the data into the HTML.</p>
+      <div class="code">// Before (client-only — invisible to AI)
+onMounted(async () => {
+  const data = await fetch('/api/support-articles')
+  articles.value = data
+})
+
+// After (server + client — AI can read it)
+const { data: articles } = await useAsyncData('support-articles', () =>
+  $fetch('/api/support-articles')
+)</div>
+      <p><strong>FAQPage schema is also fixed by this change.</strong> The schema already exists but loads client-side alongside the content. Once the fetch moves server-side, the schema becomes readable automatically — no separate schema work is needed.</p>
+      <p><strong>How to verify:</strong></p>
+      <div class="code">curl -s https://traderepublic.com/en-de/support | grep -c "What fees do you charge"</div>
+      <p>If the count is 1 or more, the content is in the HTML and AI can read it. Also run the URL through Google's Rich Results Test — if FAQPage schema is detected, both the content and schema are working.</p>
+      <a class="tool-link" href="https://search.google.com/test/rich-results" target="_blank">Rich Results Test</a>
+      <a class="tool-link" href="https://search.google.com/search-console" target="_blank">Google Search Console</a>
     </div>
   </div>
 
   <div class="task">
     <div class="task-header">
       <div class="task-num">2</div>
-      <div class="task-title">Migrate Help Centre from CSR to SSR <span class="tag tag-short" style="margin-left:8px">Short term</span></div>
+      <div class="task-title">Audit which HCAs exist only in-app and publish them to the web <span class="tag tag-short" style="margin-left:8px">Short term</span></div>
     </div>
     <div class="task-body">
-      <p>If the audit confirms CSR, migrate Help Centre to server-side or statically rendered HTML. The goal: the full article body must be present in the HTTP response before any JavaScript executes.</p>
-      <p><strong>Options (in order of preference):</strong></p>
+      <p>Any Help Centre article that exists only inside the TR app cannot be indexed or cited by AI — it is invisible to every crawler regardless of how useful or accurate it is. If a user asks Perplexity a question that TR answers in-app but not on the web, AI will source the answer from a third party.</p>
+      <p><strong>Action:</strong> Compare the full list of in-app HCAs against what is published on the web support page. For every article that exists in-app but not on the web, publish it to the support page. Prioritise articles that answer high-frequency AI queries:</p>
       <ul class="steps">
-        <li><span class="step-n">A.</span><span><strong>Static Site Generation (SSG)</strong> — pre-build all Help Centre articles as static HTML at deploy time. Best for content that doesn't change per-user. Zero runtime cost. Recommended if the HC content is served from a CMS or structured source.</span></li>
-        <li><span class="step-n">B.</span><span><strong>Server-Side Rendering (SSR)</strong> — render the page on the server for each request. Necessary if articles are personalised or dynamically filtered. Slightly more infrastructure overhead.</span></li>
-        <li><span class="step-n">C.</span><span><strong>Targeted static injection</strong> — if a full migration is too complex short-term, at minimum inject the article title and first 3 paragraphs as static HTML in the <code>&lt;body&gt;</code>, before the JS bundle loads. Imperfect but gets critical content into the crawl.</span></li>
+        <li><span class="step-n">→</span><span>Fees and pricing</span></li>
+        <li><span class="step-n">→</span><span>Safety and regulation</span></li>
+        <li><span class="step-n">→</span><span>Interest rate and cash</span></li>
+        <li><span class="step-n">→</span><span>Card usage</span></li>
+        <li><span class="step-n">→</span><span>Account closure and KYC</span></li>
+        <li><span class="step-n">→</span><span>How to contact support</span></li>
       </ul>
-      <p><strong>How to verify it worked:</strong> Re-run the curl command from Task 1 after the change. Article body text should now appear in the raw response. Also run the URL through Google's Rich Results Test — if it can parse the page content, AI crawlers can too.</p>
-      <a class="tool-link" href="https://search.google.com/test/rich-results" target="_blank">Google Rich Results Test</a>
-      <a class="tool-link" href="https://search.google.com/search-console/mobile-friendly" target="_blank">Google URL Inspection</a>
     </div>
   </div>
 
   <div class="task">
     <div class="task-header">
       <div class="task-num">3</div>
-      <div class="task-title">Add FAQPage schema to the top 20 Help Centre articles <span class="tag tag-short" style="margin-left:8px">Short term</span></div>
+      <div class="task-title">Add Organisation and Product schema to the homepage and product pages <span class="tag tag-medium" style="margin-left:8px">Medium term</span></div>
     </div>
     <div class="task-body">
-      <p>FAQPage JSON-LD tells AI systems exactly which text answers which question. It feeds directly into Google AI Overviews and is used by Perplexity to extract Q&amp;A pairs. Currently there is zero schema markup anywhere on traderepublic.com.</p>
-      <p><strong>Implementation:</strong> Add a <code>&lt;script type="application/ld+json"&gt;</code> block to the <code>&lt;head&gt;</code> of each Help Centre article. Structure:</p>
-      <div class="code">{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [{
-    "@type": "Question",
-    "name": "Is Trade Republic safe?",
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "Trade Republic Bank GmbH is regulated by BaFin and the Deutsche Bundesbank, holds an ECB banking licence, and provides €100,000 deposit protection under the German deposit guarantee scheme. Customer securities are held in custody at Clearstream."
-    }
-  }]
-}</div>
-      <p><strong>Prioritise articles that answer:</strong> "Is TR safe?", "What are TR's fees?", "How does TR make money?", "What is TR's interest rate?", "How do I contact TR support?", "How do I close my account?" — these are the highest-frequency AI queries about TR.</p>
-      <p><strong>Key rule:</strong> The answer text in schema must match visible page content exactly. Google and AI systems cross-reference the two.</p>
-      <a class="tool-link" href="https://validator.schema.org" target="_blank">Schema Validator</a>
-      <a class="tool-link" href="https://search.google.com/test/rich-results" target="_blank">Rich Results Test</a>
-    </div>
-  </div>
-
-  <div class="task">
-    <div class="task-header">
-      <div class="task-num">4</div>
-      <div class="task-title">Add Organisation and Product schema to homepage and product pages <span class="tag tag-medium" style="margin-left:8px">Medium term</span></div>
-    </div>
-    <div class="task-body">
-      <p>Organization schema on the homepage establishes TR's identity — name, regulation, founding date, markets, licence — as a machine-readable fact. Product schema on the three core product pages gives AI exact current rates and fees to quote directly.</p>
-      <p><strong>Homepage — Organization schema:</strong></p>
+      <p>The homepage is already SSR (Nuxt renders it server-side). It just lacks schema. Adding Organization and Product schema here is low-effort — no rendering change needed, only adding a <code>&lt;script type="application/ld+json"&gt;</code> block to the page head.</p>
+      <p><strong>Homepage — Organization schema:</strong> Establishes TR's identity as a machine-readable fact — name, regulation, markets, licence type. AI uses this to answer "what is Trade Republic?" and "is TR regulated?"</p>
       <div class="code">{
   "@context": "https://schema.org",
   "@type": "FinancialService",
@@ -135,23 +140,23 @@
   "legalName": "Trade Republic Bank GmbH",
   "url": "https://www.traderepublic.com",
   "foundingDate": "2015",
-  "numberOfEmployees": { "@type": "QuantitativeValue", "value": 1200 },
-  "areaServed": ["DE","AT","FR","ES","IT","NL","BE","PT","FI","..."],
-  "regulatoryBody": { "@type": "Organization", "name": "BaFin" }
+  "areaServed": ["DE","AT","FR","ES","IT","NL","BE","PT","FI","PL","..."],
+  "regulatoryBody": { "@type": "Organization", "name": "BaFin" },
+  "memberOf": { "@type": "Organization", "name": "German Deposit Guarantee Scheme" }
 }</div>
-      <p><strong>Product pages to add Product schema:</strong></p>
+      <p><strong>Product pages — Product schema:</strong> Add to the Interest Account, ETF Savings Plan, and Stock Trading pages. Gives AI current rates and fees to quote directly rather than inferring from stale editorial content.</p>
       <ul class="steps">
+        <li><span class="step-n">→</span><span><strong>Interest Account</strong> — rate: 2.00% p.a. (must update whenever ECB rate changes — stale rate in schema is worse than no schema)</span></li>
         <li><span class="step-n">→</span><span><strong>ETF Savings Plan</strong> — fee: €0, minimum: €1/month</span></li>
-        <li><span class="step-n">→</span><span><strong>Interest Account</strong> — current rate: 2.00% p.a. (update this whenever rate changes)</span></li>
-        <li><span class="step-n">→</span><span><strong>Stock/ETF trading</strong> — fee: €1 per trade</span></li>
+        <li><span class="step-n">→</span><span><strong>Stock/ETF trading</strong> — trade settlement fee: €1 per trade, savings plans: €0</span></li>
       </ul>
-      <p><strong>Important:</strong> Product schema rates must be kept current. A stale rate in schema is worse than no schema — AI will cite the wrong number with confidence.</p>
+      <p><strong>Rate update process:</strong> Assign one owner to update the interest rate schema whenever the ECB changes the rate. This should be part of the existing rate-change communications process — add schema update as a checklist item.</p>
     </div>
   </div>
 
   <div class="outcome">
     <strong>Expected outcome</strong>
-    After all four tasks: Help Centre articles appear in Google AI Overviews for TR-specific questions. Perplexity begins citing TR's own pages rather than third-party review sites for factual queries. Organisation and Product schema means AI quotes current TR rates accurately rather than inferring from stale editorial content.
+    After Tasks 1 and 2: TR's support page content becomes crawlable for the first time. Perplexity and Google AI Overviews can read and cite TR's own answers to fee, safety, and product questions — rather than relying on third-party editorial sites. After Task 3: AI quotes current TR rates accurately, with TR as the primary source.
   </div>
 </div>
 </body>
