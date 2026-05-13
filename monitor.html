@@ -1247,17 +1247,14 @@ function renderForecast() {
     ? addDays(latest.date, etaAtCurrent).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     : null;
 
-  // Insight banner
-  const insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;line-height:1.8">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:12px">
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Daily rate (28d avg)</div><div style="font-size:20px;font-weight:800;color:var(--green)">${observedRate}/day</div><div style="font-size:11px;color:var(--muted)">${latest.volume28d} reviews in 28d</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Incoming quality</div><div style="font-size:20px;font-weight:800;color:var(--green)">${currentAvg.toFixed(2)}★</div><div style="font-size:11px;color:var(--muted)">avg of incoming reviews</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Effective weight</div><div style="font-size:20px;font-weight:800;color:var(--green)">~${nEff.toLocaleString()}</div><div style="font-size:11px;color:var(--muted)">reviews influencing score</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">New reviews needed</div><div style="font-size:20px;font-weight:800;color:var(--green)">${reviewsNeeded ? '~' + reviewsNeeded.toLocaleString() : '—'}</div><div style="font-size:11px;color:var(--muted)">to reach 4.0★</div></div>
-    </div>
-    <div style="color:#94a3b8;font-size:12px">Trustpilot decays old reviews — only ~${nEff.toLocaleString()} reviews meaningfully influence the current score.${trend && trend.slope > 0 ? ` Incoming quality improving <strong style="color:var(--green)">+${trend.slope.toFixed(3)}★/day</strong>.` : ''} At current rate, 4.0★ estimated <strong style="color:#fff">${etaDate || '—'}</strong>.</div>
-  </div>`;
-  document.getElementById('scenario-cards').innerHTML = insightHtml;
+  // Milestone targets: each 0.1★ increment from just above current score to 4.0
+  const milestoneTargets = [];
+  for (let i = 1; i <= 10; i++) {
+    const m = +(latest.score + i * 0.1).toFixed(1);
+    if (m > 4.05) break;
+    milestoneTargets.push(m);
+  }
+  const milestoneDays = {};
 
   // Chart: one tick per calendar month, ending ~2 months after ETA
   const CHART_END_DAYS = Math.min((etaAtCurrent || 180) + 60, 730);
@@ -1277,7 +1274,7 @@ function renderForecast() {
     addDays(latest.date, d).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })
   );
 
-  // Simulate day-by-day, sample at each tick day
+  // Single simulation pass: collect chart points + milestone crossings
   const tickSet = new Set(tickDays);
   const pts = [];
   let score = latest.score;
@@ -1286,7 +1283,38 @@ function renderForecast() {
     if (tickSet.has(d)) pts.push(+Math.min(5, score).toFixed(4));
     score = (score * effectiveOld + avgFn(d + 1) * observedRate) / (effectiveOld + observedRate);
     effectiveOld = Math.min(effectiveOld + observedRate * 0.1, nEff * 1.5);
+    milestoneTargets.forEach(m => {
+      if (!(m in milestoneDays) && score >= m) milestoneDays[m] = d + 1;
+    });
   }
+
+  // Milestone row HTML (built after simulation)
+  const milestoneRowHtml = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px">
+    ${milestoneTargets.map(m => {
+      const d = milestoneDays[m];
+      const dateStr = d
+        ? addDays(latest.date, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        : '—';
+      const isTarget = m === 4.0;
+      return `<div style="flex:1;min-width:80px;background:${isTarget ? '#0a2218' : '#12141c'};border:1px solid ${isTarget ? 'var(--green)' : 'var(--border)'};border-radius:8px;padding:10px 12px;text-align:center">
+        <div style="font-size:16px;font-weight:800;color:${isTarget ? 'var(--green)' : 'var(--text)'}">${m.toFixed(1)}★</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${dateStr}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  // Insight banner (built after simulation so milestoneRowHtml is ready)
+  const insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;line-height:1.8">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:12px">
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Daily rate (28d avg)</div><div style="font-size:20px;font-weight:800;color:var(--green)">${observedRate}/day</div><div style="font-size:11px;color:var(--muted)">${latest.volume28d} reviews in 28d</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Incoming quality</div><div style="font-size:20px;font-weight:800;color:var(--green)">${currentAvg.toFixed(2)}★</div><div style="font-size:11px;color:var(--muted)">avg of incoming reviews</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Effective weight</div><div style="font-size:20px;font-weight:800;color:var(--green)">~${nEff.toLocaleString()}</div><div style="font-size:11px;color:var(--muted)">reviews influencing score</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">New reviews needed</div><div style="font-size:20px;font-weight:800;color:var(--green)">${reviewsNeeded ? '~' + reviewsNeeded.toLocaleString() : '—'}</div><div style="font-size:11px;color:var(--muted)">to reach 4.0★</div></div>
+    </div>
+    ${milestoneRowHtml}
+    <div style="color:#94a3b8;font-size:12px;margin-top:10px">Trustpilot decays old reviews — only ~${nEff.toLocaleString()} reviews meaningfully influence the current score.${trend && trend.slope > 0 ? ` Incoming quality improving <strong style="color:var(--green)">+${trend.slope.toFixed(3)}★/day</strong>.` : ''} At current rate, 4.0★ estimated <strong style="color:#fff">${etaDate || '—'}</strong>.</div>
+  </div>`;
+  document.getElementById('scenario-cards').innerHTML = insightHtml;
 
   destroyChart('forecastChart');
   charts['forecastChart'] = new Chart(document.getElementById('forecastChart'), {
