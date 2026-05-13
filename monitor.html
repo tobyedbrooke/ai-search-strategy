@@ -1209,33 +1209,40 @@ function renderForecast() {
   if (!tpData.length) return;
   const latest = tpData[tpData.length - 1];
   const trend = getIncomingTrend();
-  const dailyRate = latest.volume28d / 28;
-  const fallbackAvg = calcAvgIncoming(latest) || 3.69;
+  const currentAvg = calcAvgIncoming(latest) || 4.41;
+  const avgFn = trend ? trend.projAt : () => currentAvg;
 
-  // avgFn: uses trend extrapolation if available, else flat current avg
-  const avgFn = trend ? trend.projAt : () => fallbackAvg;
+  // Observed daily rate from 28d window
+  const observedRate = Math.round(latest.volume28d / 28);
 
-  // Incoming avg hits 4.0 insight
+  // Reviews needed to reach 4.0 at current incoming quality (static estimate for insight)
+  const reviewsNeeded = currentAvg > 4.0
+    ? Math.round((4.0 * latest.totalReviews - latest.score * latest.totalReviews) / (currentAvg - 4.0))
+    : null;
+
+  // Insight banner
   let insightHtml = '';
-  if (trend && trend.slope > 0) {
-    insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.7">
-      <strong style="color:var(--green)">Incoming review quality improving +${trend.slope.toFixed(3)}★/day.</strong>
-      The target is the <strong>Trustpilot rating reaching 4.0★</strong>. The ${latest.totalReviews.toLocaleString()} existing reviews mean the score moves slowly —
-      <strong>volume is the lever.</strong> Scenarios below show the ETA at different daily review rates, all using the current quality trend.
-    </div>`;
-  } else if (trend && trend.slope <= 0) {
-    insightHtml = `<div style="background:#1a1212;border:1px solid var(--red);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px">
-      <strong style="color:var(--red)">Warning:</strong> Incoming review quality trend is flat or declining. Add more data points to confirm direction.
+  if (currentAvg > latest.score) {
+    const etaAtCurrent = reviewsNeeded ? Math.round(reviewsNeeded / observedRate) : null;
+    const etaDate = etaAtCurrent ? addDays(latest.date, etaAtCurrent).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
+    insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;line-height:1.8">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:12px">
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Observed daily rate</div><div style="font-size:20px;font-weight:800;color:var(--green)">${observedRate}/day</div><div style="font-size:11px;color:var(--muted)">28d avg · ${latest.volume28d} reviews</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Incoming quality</div><div style="font-size:20px;font-weight:800;color:var(--green)">${currentAvg.toFixed(2)}★</div><div style="font-size:11px;color:var(--muted)">weighted avg of incoming reviews</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Reviews needed</div><div style="font-size:20px;font-weight:800;color:var(--green)">${reviewsNeeded ? '~' + reviewsNeeded.toLocaleString() : '—'}</div><div style="font-size:11px;color:var(--muted)">new reviews to reach 4.0★</div></div>
+      </div>
+      ${trend && trend.slope > 0 ? `<div style="color:#94a3b8">Incoming quality improving <strong style="color:var(--green)">+${trend.slope.toFixed(3)}★/day</strong>. At current rate, 4.0★ expected <strong style="color:#fff">${etaDate || '—'}</strong>. Scenarios below show how volume changes the date.</div>` : `<div style="color:#94a3b8">At current rate of ${observedRate} reviews/day, 4.0★ expected <strong style="color:#fff">${etaDate || '—'}</strong>. Scenarios below show how volume changes the date.</div>`}
     </div>`;
   }
 
+  // Scenarios grounded in observed data
   const scenarios = [
-    { id: 'a',  label: 'Current Trajectory',                  rate: 50,  color: 'a',
-      desc: '50 reviews/day · quality follows trend' },
-    { id: 'b',  label: 'Optimal NPS',                         rate: 100, color: 'b',
-      desc: '100 reviews/day · quality follows trend' },
-    { id: 'ss', label: 'Trustpilot Premium + Optimal NPS',    rate: 300, color: 'ss',
-      desc: '300 reviews/day · quality follows trend' },
+    { id: 'a',  label: 'Current rate',      rate: observedRate,          color: 'a',
+      desc: `${observedRate} reviews/day · observed 28d avg` },
+    { id: 'b',  label: '2× current rate',   rate: observedRate * 2,      color: 'b',
+      desc: `${observedRate * 2} reviews/day · NPS push doubles volume` },
+    { id: 'ss', label: '3× current rate',   rate: observedRate * 3,      color: 'ss',
+      desc: `${observedRate * 3} reviews/day · Trustpilot Premium + NPS` },
   ];
 
   const MAX_SIM = 2555; // 7 years
@@ -1247,8 +1254,8 @@ function renderForecast() {
   let cardsHtml = insightHtml;
   scenarioResults.forEach(sc => {
     const etaDate = sc.eta4 ? addDays(latest.date, sc.eta4) : null;
-    const etaText = etaDate ? formatDate(etaDate) : '5+ years';
-    const daysText = sc.eta4 ? `~${sc.eta4.toLocaleString()} days away` : 'Beyond 7-year horizon';
+    const etaText = etaDate ? etaDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '5+ years';
+    const daysText = sc.eta4 ? `~${sc.eta4.toLocaleString()} days from now` : 'Beyond 7-year horizon';
     cardsHtml += `
       <div class="scenario-card ${sc.color}">
         <div class="sc-label">${sc.label}</div>
@@ -1258,23 +1265,24 @@ function renderForecast() {
   });
   document.getElementById('scenario-cards').innerHTML = cardsHtml;
 
-  // Forecast chart — 10 evenly spaced points from today to 28 Oct 2026
-  destroyChart('forecastChart');
-  const CHART_END = new Date('2028-10-01');
-  const CHART_TOTAL_DAYS = Math.round((CHART_END - new Date(latest.date)) / 86400000);
-  const CHART_POINTS = 10;
-  const CHART_STEP = Math.round(CHART_TOTAL_DAYS / (CHART_POINTS - 1));
+  // Chart end — extend to cover furthest ETA + buffer
+  const maxEta = Math.max(...scenarioResults.map(s => s.eta4 || 0));
+  const CHART_END_DAYS = Math.min(maxEta + 180, 2555);
+  const CHART_POINTS = 12;
+  const CHART_STEP = Math.round(CHART_END_DAYS / (CHART_POINTS - 1));
   const chartLabels = [];
   for (let i = 0; i < CHART_POINTS; i++) {
-    const day = i === CHART_POINTS - 1 ? CHART_TOTAL_DAYS : i * CHART_STEP;
-    chartLabels.push(addDays(latest.date, day).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+    const day = i === CHART_POINTS - 1 ? CHART_END_DAYS : i * CHART_STEP;
+    chartLabels.push(addDays(latest.date, day).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }));
   }
+
+  destroyChart('forecastChart');
   const colors = { a: '#f59e0b', b: '#22c55e', ss: '#e879f9' };
   const datasets = scenarioResults.map(sc => {
     const pts = [];
     let score = latest.score, total = latest.totalReviews;
-    for (let d = 0; d <= CHART_TOTAL_DAYS; d++) {
-      const isPoint = (d % CHART_STEP === 0) || d === CHART_TOTAL_DAYS;
+    for (let d = 0; d <= CHART_END_DAYS; d++) {
+      const isPoint = (d % CHART_STEP === 0) || d === CHART_END_DAYS;
       if (isPoint && pts.length < CHART_POINTS) pts.push(+Math.min(5, score).toFixed(4));
       score = (score * total + avgFn(d + 1) * sc.rate) / (total + sc.rate);
       total += sc.rate;
@@ -1285,10 +1293,9 @@ function renderForecast() {
       borderColor: colors[sc.color],
       backgroundColor: 'transparent',
       tension: 0.3,
-      pointRadius: 4,
+      pointRadius: 3,
       pointBackgroundColor: colors[sc.color],
       borderWidth: 2,
-      borderDash: [],
     };
   });
   datasets.push({
@@ -1308,7 +1315,9 @@ function renderForecast() {
       plugins: { legend: { display: true, labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 18, padding: 14 } } },
       scales: {
         x: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
-        y: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } }, min: 3.0, max: 5.0 }
+        y: { grid: { color: '#2e3250' }, ticks: { color: '#94a3b8', font: { size: 11 } }, min: 3.3, max: 4.2,
+          afterBuildTicks: axis => { axis.ticks = [3.3,3.4,3.5,3.6,3.7,3.8,3.9,4.0,4.1,4.2].map(v => ({ value: v })); }
+        }
       }
     }
   });
