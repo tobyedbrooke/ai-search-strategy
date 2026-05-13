@@ -1246,6 +1246,11 @@ function renderForecast() {
     ? Math.round(nEff * (4.0 - latest.score) / (currentAvg - 4.0))
     : null;
 
+  // Aggressive scenario: 50/day, 4.5★ avg
+  const aggrRate = 50;
+  const aggrAvg = 4.5;
+  const aggrReviewsNeeded = Math.round(nEff * (4.0 - latest.score) / (aggrAvg - 4.0));
+
   // Milestone targets: each 0.1★ increment from just above current score to 4.0
   const milestoneTargets = [];
   for (let i = 1; i <= 10; i++) {
@@ -1254,14 +1259,15 @@ function renderForecast() {
     milestoneTargets.push(m);
   }
   const milestoneDays = {};
+  const milestoneDaysAggr = {};
 
-  // Chart: one tick per calendar month — reviewsNeeded gives rough ETA for sizing
+  // Chart: size to cover the conservative scenario
   const roughEtaDays = reviewsNeeded ? Math.round(reviewsNeeded / observedRate) : 180;
   const CHART_END_DAYS = Math.min(roughEtaDays + 60, 730);
   const startDate = new Date(latest.date);
   const endDate = new Date(startDate); endDate.setDate(endDate.getDate() + CHART_END_DAYS);
 
-  // Build monthly tick offsets (day 0 = latest, then 1st of each following month)
+  // Build monthly tick offsets
   const tickDays = [0];
   let cur = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
   while (cur <= endDate) {
@@ -1274,46 +1280,54 @@ function renderForecast() {
     addDays(latest.date, d).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })
   );
 
-  // Single simulation pass: collect chart points + milestone crossings
-  // Uses flat currentAvg — no trend extrapolation
+  // Simulate both scenarios in one pass
   const tickSet = new Set(tickDays);
-  const pts = [];
-  let score = latest.score;
-  let effectiveOld = nEff;
+  const pts = [], ptsAggr = [];
+  let score = latest.score, scoreAggr = latest.score;
+  let effOld = nEff, effOldAggr = nEff;
   for (let d = 0; d <= CHART_END_DAYS; d++) {
-    if (tickSet.has(d)) pts.push(+Math.min(5, score).toFixed(4));
-    score = (score * effectiveOld + flatAvg() * observedRate) / (effectiveOld + observedRate);
-    effectiveOld = Math.min(effectiveOld + observedRate * 0.1, nEff * 1.5);
+    if (tickSet.has(d)) {
+      pts.push(+Math.min(5, score).toFixed(4));
+      ptsAggr.push(+Math.min(5, scoreAggr).toFixed(4));
+    }
+    score = (score * effOld + currentAvg * observedRate) / (effOld + observedRate);
+    effOld = Math.min(effOld + observedRate * 0.1, nEff * 1.5);
+    scoreAggr = (scoreAggr * effOldAggr + aggrAvg * aggrRate) / (effOldAggr + aggrRate);
+    effOldAggr = Math.min(effOldAggr + aggrRate * 0.1, nEff * 1.5);
     milestoneTargets.forEach(m => {
       if (!(m in milestoneDays) && score >= m) milestoneDays[m] = d + 1;
+      if (!(m in milestoneDaysAggr) && scoreAggr >= m) milestoneDaysAggr[m] = d + 1;
     });
   }
 
-  // Milestone row HTML (built after simulation)
-  const milestoneRowHtml = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px">
-    ${milestoneTargets.map(m => {
-      const d = milestoneDays[m];
-      const dateStr = d
-        ? addDays(latest.date, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-        : '—';
-      const isTarget = m === 4.0;
-      return `<div style="flex:1;min-width:80px;background:${isTarget ? '#0a2218' : '#12141c'};border:1px solid ${isTarget ? 'var(--green)' : 'var(--border)'};border-radius:8px;padding:10px 12px;text-align:center">
-        <div style="font-size:16px;font-weight:800;color:${isTarget ? 'var(--green)' : 'var(--text)'}">${m.toFixed(1)}★</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px">${dateStr}</div>
-      </div>`;
-    }).join('')}
-  </div>`;
+  // Milestone rows HTML
+  function milestoneRow(days, color, label) {
+    return `<div style="margin-bottom:6px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:${color};margin-bottom:6px">${label}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${milestoneTargets.map(m => {
+          const d = days[m];
+          const dateStr = d ? addDays(latest.date, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+          const isTarget = m === 4.0;
+          return `<div style="flex:1;min-width:72px;background:${isTarget ? '#0a1a10' : '#12141c'};border:1px solid ${isTarget ? color : 'var(--border)'};border-radius:7px;padding:8px 10px;text-align:center">
+            <div style="font-size:14px;font-weight:800;color:${isTarget ? color : 'var(--text)'}">${m.toFixed(1)}★</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${dateStr}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
 
-  // Insight banner (built after simulation so milestoneRowHtml is ready)
+  // Insight banner
   const insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;line-height:1.8">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:14px">
       <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Daily rate (28d avg)</div><div style="font-size:20px;font-weight:800;color:var(--green)">${observedRate}/day</div><div style="font-size:11px;color:var(--muted)">${latest.volume28d} reviews in 28d</div></div>
       <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Incoming quality</div><div style="font-size:20px;font-weight:800;color:var(--green)">${currentAvg.toFixed(2)}★</div><div style="font-size:11px;color:var(--muted)">avg of incoming reviews</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Effective weight</div><div style="font-size:20px;font-weight:800;color:var(--green)">~${nEff.toLocaleString()}</div><div style="font-size:11px;color:var(--muted)">reviews influencing score</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">New reviews needed</div><div style="font-size:20px;font-weight:800;color:var(--green)">${reviewsNeeded ? '~' + reviewsNeeded.toLocaleString() : '—'}</div><div style="font-size:11px;color:var(--muted)">to reach 4.0★</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Reviews to 4.0★</div><div style="font-size:20px;font-weight:800;color:var(--green)">${reviewsNeeded ? '~' + reviewsNeeded.toLocaleString() : '—'}</div><div style="font-size:11px;color:var(--muted)">at current rate</div></div>
     </div>
-    ${milestoneRowHtml}
-    <div style="color:#94a3b8;font-size:12px;margin-top:10px">Trustpilot decays old reviews — only ~${nEff.toLocaleString()} reviews meaningfully influence the current score. Forecast uses flat incoming quality (${currentAvg.toFixed(2)}★ avg) — the recent quality improvement reflects the NPS invitation ramp-up and is not projected forward. 4.0★ estimated <strong style="color:#fff">${milestoneDays[4.0] ? addDays(latest.date, milestoneDays[4.0]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</strong>.</div>
+    ${milestoneRow(milestoneDays, '#f59e0b', `Current rate — ${observedRate}/day · ${currentAvg.toFixed(2)}★ avg`)}
+    ${milestoneRow(milestoneDaysAggr, '#818cf8', `Aggressive — ${aggrRate}/day · ${aggrAvg.toFixed(1)}★ avg`)}
+    <div style="color:#94a3b8;font-size:12px;margin-top:10px">Forecast uses flat incoming quality — the recent quality improvement reflects the NPS invitation ramp-up and is not projected forward.</div>
   </div>`;
   document.getElementById('scenario-cards').innerHTML = insightHtml;
 
@@ -1324,15 +1338,25 @@ function renderForecast() {
       labels: chartLabels,
       datasets: [
         {
-          label: 'Forecast (current rate)',
+          label: `Current rate (${observedRate}/day · ${currentAvg.toFixed(2)}★)`,
           data: pts,
           borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245,158,11,0.08)',
-          fill: true,
+          backgroundColor: 'transparent',
           tension: 0.3,
           pointRadius: 3,
           pointBackgroundColor: '#f59e0b',
           borderWidth: 2,
+        },
+        {
+          label: `Aggressive (${aggrRate}/day · ${aggrAvg.toFixed(1)}★)`,
+          data: ptsAggr,
+          borderColor: '#818cf8',
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: '#818cf8',
+          borderWidth: 2,
+          borderDash: [5, 3],
         },
         {
           label: '4.0★ target',
