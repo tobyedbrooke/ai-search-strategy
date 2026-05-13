@@ -664,13 +664,35 @@ function getIncomingTrend() {
   };
 }
 
-// Day-by-day simulation using a dynamic avg function; returns {path:[{day,score}], eta4 (days|null)}
-function simulateScore(startScore, totalReviews, dailyRate, avgFn, maxDays) {
-  let score = startScore, total = totalReviews, eta4 = null;
+// Compute empirical n_eff from the best available consecutive data pair where
+// score changed and totalReviews differ. n_eff = n_new * (avg_new - score_new) / (score_new - score_old)
+// This captures Trustpilot's decay weighting of old reviews.
+function computeNeff() {
+  let best = null;
+  for (let i = tpData.length - 1; i >= 1; i--) {
+    const a = tpData[i - 1], b = tpData[i];
+    const n_new = b.totalReviews - a.totalReviews;
+    if (n_new <= 0 || a.score === b.score) continue;
+    const avg_new = calcAvgIncoming(b);
+    if (!avg_new || avg_new <= b.score) continue;
+    const n_eff = n_new * (avg_new - b.score) / (b.score - a.score);
+    if (n_eff > 0) { best = Math.round(n_eff); break; }
+  }
+  return best;
+}
+
+// Day-by-day simulation using effective review weight (n_eff) rather than raw total.
+// Trustpilot decays old reviews — old reviews count for ~n_eff, not the full 33k total.
+// n_eff stays roughly stable as the "window" of influential reviews is bounded.
+function simulateScore(startScore, nEff, dailyRate, avgFn, maxDays) {
+  let score = startScore, eta4 = null;
+  // effectiveOld starts at n_eff and stays bounded — new reviews displace old ones
+  let effectiveOld = nEff;
   const path = [{ day: 0, score }];
   for (let d = 1; d <= maxDays; d++) {
-    score = (score * total + avgFn(d) * dailyRate) / (total + dailyRate);
-    total += dailyRate;
+    score = (score * effectiveOld + avgFn(d) * dailyRate) / (effectiveOld + dailyRate);
+    // effective window grows slowly — new reviews partially displace old weight
+    effectiveOld = Math.min(effectiveOld + dailyRate * 0.1, nEff * 1.5);
     if (!eta4 && score >= 4.0) eta4 = d;
     if (d % 30 === 0) path.push({ day: d, score: +score.toFixed(4) });
   }
@@ -1215,9 +1237,13 @@ function renderForecast() {
   // Observed daily rate from 28d window
   const observedRate = Math.round(latest.volume28d / 28);
 
-  // Reviews needed to reach 4.0 at current incoming quality (static estimate for insight)
-  const reviewsNeeded = currentAvg > 4.0
-    ? Math.round((4.0 * latest.totalReviews - latest.score * latest.totalReviews) / (currentAvg - 4.0))
+  // n_eff: effective weight of old reviews, calibrated from observed score movement.
+  // Trustpilot decays old reviews so only ~n_eff reviews actually influence the current score.
+  const nEff = computeNeff() || Math.round(latest.totalReviews * 0.1);
+
+  // Reviews needed using n_eff (not raw total — that gives wildly wrong answers)
+  const reviewsNeeded = currentAvg > latest.score
+    ? Math.round(nEff * (latest.score - 4.0) / (4.0 - currentAvg)) * -1
     : null;
 
   // Insight banner
@@ -1226,28 +1252,29 @@ function renderForecast() {
     const etaAtCurrent = reviewsNeeded ? Math.round(reviewsNeeded / observedRate) : null;
     const etaDate = etaAtCurrent ? addDays(latest.date, etaAtCurrent).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
     insightHtml = `<div style="background:linear-gradient(135deg,#0a2218,#1a1d27);border:1px solid var(--green);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;line-height:1.8">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:12px">
-        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Observed daily rate</div><div style="font-size:20px;font-weight:800;color:var(--green)">${observedRate}/day</div><div style="font-size:11px;color:var(--muted)">28d avg · ${latest.volume28d} reviews</div></div>
-        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Incoming quality</div><div style="font-size:20px;font-weight:800;color:var(--green)">${currentAvg.toFixed(2)}★</div><div style="font-size:11px;color:var(--muted)">weighted avg of incoming reviews</div></div>
-        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Reviews needed</div><div style="font-size:20px;font-weight:800;color:var(--green)">${reviewsNeeded ? '~' + reviewsNeeded.toLocaleString() : '—'}</div><div style="font-size:11px;color:var(--muted)">new reviews to reach 4.0★</div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:12px">
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Daily rate (28d avg)</div><div style="font-size:20px;font-weight:800;color:var(--green)">${observedRate}/day</div><div style="font-size:11px;color:var(--muted)">${latest.volume28d} reviews in 28d</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Incoming quality</div><div style="font-size:20px;font-weight:800;color:var(--green)">${currentAvg.toFixed(2)}★</div><div style="font-size:11px;color:var(--muted)">avg of incoming reviews</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">Effective weight</div><div style="font-size:20px;font-weight:800;color:var(--green)">~${nEff.toLocaleString()}</div><div style="font-size:11px;color:var(--muted)">reviews influencing score</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px">New reviews needed</div><div style="font-size:20px;font-weight:800;color:var(--green)">${reviewsNeeded ? '~' + reviewsNeeded.toLocaleString() : '—'}</div><div style="font-size:11px;color:var(--muted)">to reach 4.0★</div></div>
       </div>
-      ${trend && trend.slope > 0 ? `<div style="color:#94a3b8">Incoming quality improving <strong style="color:var(--green)">+${trend.slope.toFixed(3)}★/day</strong>. At current rate, 4.0★ expected <strong style="color:#fff">${etaDate || '—'}</strong>. Scenarios below show how volume changes the date.</div>` : `<div style="color:#94a3b8">At current rate of ${observedRate} reviews/day, 4.0★ expected <strong style="color:#fff">${etaDate || '—'}</strong>. Scenarios below show how volume changes the date.</div>`}
+      <div style="color:#94a3b8;font-size:12px">Trustpilot decays old reviews — only ~${nEff.toLocaleString()} reviews have meaningful influence on the current score (calibrated from observed score movement). ${trend && trend.slope > 0 ? `Incoming quality improving <strong style="color:var(--green)">+${trend.slope.toFixed(3)}★/day</strong>.` : ''} At current rate, 4.0★ estimated <strong style="color:#fff">${etaDate || '—'}</strong>.</div>
     </div>`;
   }
 
   // Scenarios grounded in observed data
   const scenarios = [
-    { id: 'a',  label: 'Current rate',      rate: observedRate,          color: 'a',
+    { id: 'a',  label: 'Current rate',    rate: observedRate,      color: 'a',
       desc: `${observedRate} reviews/day · observed 28d avg` },
-    { id: 'b',  label: '2× current rate',   rate: observedRate * 2,      color: 'b',
+    { id: 'b',  label: '2× current rate', rate: observedRate * 2,  color: 'b',
       desc: `${observedRate * 2} reviews/day · NPS push doubles volume` },
-    { id: 'ss', label: '3× current rate',   rate: observedRate * 3,      color: 'ss',
+    { id: 'ss', label: '3× current rate', rate: observedRate * 3,  color: 'ss',
       desc: `${observedRate * 3} reviews/day · Trustpilot Premium + NPS` },
   ];
 
-  const MAX_SIM = 2555; // 7 years
+  const MAX_SIM = 730; // 2 years max
   let scenarioResults = scenarios.map(sc => {
-    const { path, eta4 } = simulateScore(latest.score, latest.totalReviews, sc.rate, avgFn, MAX_SIM);
+    const { path, eta4 } = simulateScore(latest.score, nEff, sc.rate, avgFn, MAX_SIM);
     return { ...sc, path, eta4 };
   });
 
