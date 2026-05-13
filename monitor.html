@@ -1259,22 +1259,31 @@ function renderForecast() {
   </div>`;
   document.getElementById('scenario-cards').innerHTML = insightHtml;
 
-  // Chart: single forecast line using bounded nEff model
+  // Chart: one tick per calendar month, ending ~2 months after ETA
   const CHART_END_DAYS = Math.min((etaAtCurrent || 180) + 60, 730);
-  const CHART_POINTS = 12;
-  const CHART_STEP = Math.round(CHART_END_DAYS / (CHART_POINTS - 1));
-  const chartLabels = [];
-  for (let i = 0; i < CHART_POINTS; i++) {
-    const day = i === CHART_POINTS - 1 ? CHART_END_DAYS : i * CHART_STEP;
-    chartLabels.push(addDays(latest.date, day).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }));
-  }
+  const startDate = new Date(latest.date);
+  const endDate = new Date(startDate); endDate.setDate(endDate.getDate() + CHART_END_DAYS);
 
+  // Build monthly tick offsets (day 0 = latest, then 1st of each following month)
+  const tickDays = [0];
+  let cur = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
+  while (cur <= endDate) {
+    tickDays.push(Math.round((cur - startDate) / 86400000));
+    cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+  }
+  if (tickDays[tickDays.length - 1] < CHART_END_DAYS) tickDays.push(CHART_END_DAYS);
+
+  const chartLabels = tickDays.map(d =>
+    addDays(latest.date, d).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })
+  );
+
+  // Simulate day-by-day, sample at each tick day
+  const tickSet = new Set(tickDays);
   const pts = [];
   let score = latest.score;
   let effectiveOld = nEff;
   for (let d = 0; d <= CHART_END_DAYS; d++) {
-    const isPoint = (d % CHART_STEP === 0) || d === CHART_END_DAYS;
-    if (isPoint && pts.length < CHART_POINTS) pts.push(+Math.min(5, score).toFixed(4));
+    if (tickSet.has(d)) pts.push(+Math.min(5, score).toFixed(4));
     score = (score * effectiveOld + avgFn(d + 1) * observedRate) / (effectiveOld + observedRate);
     effectiveOld = Math.min(effectiveOld + observedRate * 0.1, nEff * 1.5);
   }
